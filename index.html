@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Giroszkóp-teszt</title>
+<style>
+:root{
+  --bg:#e9e4d8; --board:#c9a46a; --rim:#8a6a3c; --ink:#2b2418; --muted:#6b5d45;
+  --ball:#3d4a5c; --ok:#2f6b3a; --bad:#a3352a; --btn:#2b2418; --btnText:#f3eee2;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#1d1a15; --board:#6e5634; --rim:#3e301c; --ink:#efe7d6; --muted:#b5a68a;
+    --ball:#d9dfe8; --ok:#7fc48a; --bad:#e8826f; --btn:#efe7d6; --btnText:#1d1a15;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#1d1a15; --board:#6e5634; --rim:#3e301c; --ink:#efe7d6; --muted:#b5a68a;
+  --ball:#d9dfe8; --ok:#7fc48a; --bad:#e8826f; --btn:#efe7d6; --btnText:#1d1a15;
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:-apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  display:flex; flex-direction:column; align-items:center; gap:1rem;
+  padding:1rem; overflow:hidden; touch-action:none; -webkit-user-select:none; user-select:none;
+}
+h1{font-size:1.4rem;margin:.25rem 0 0;font-weight:650}
+p{margin:0;color:var(--muted);max-width:36rem;text-align:center;line-height:1.45}
+button{
+  font:inherit;font-size:1.1rem;font-weight:600;padding:.8rem 1.6rem;border:0;border-radius:999px;
+  background:var(--btn);color:var(--btnText);cursor:pointer;
+}
+button:focus-visible{outline:3px solid var(--ok);outline-offset:3px}
+#status{font-weight:600}
+#status.ok{color:var(--ok)} #status.bad{color:var(--bad)}
+#board{
+  position:relative; width:min(80vw,60vh); aspect-ratio:1; border-radius:18px;
+  background:var(--board); box-shadow:inset 0 0 0 10px var(--rim);
+}
+#ball{
+  position:absolute; width:8%; aspect-ratio:1; border-radius:50%; background:var(--ball);
+  left:46%; top:46%;
+}
+#vals{display:grid;grid-template-columns:repeat(3,auto);gap:.25rem 1.5rem;font-variant-numeric:tabular-nums;color:var(--muted)}
+#vals b{color:var(--ink);font-weight:600}
+</style>
+</head>
+<body>
+  <h1>Giroszkóp-teszt</h1>
+  <p>Nyomd meg az indítás gombot, engedélyezd a mozgásérzékelést, majd döntsd meg az iPadet. Ha a golyó gurul, a szenzor működik ebben a környezetben.</p>
+  <button id="start">Indítás</button>
+  <div id="status">Még nem indult el</div>
+  <div id="board"><div id="ball"></div></div>
+  <div id="vals">
+    <span>alpha: <b id="a">–</b></span>
+    <span>beta: <b id="b">–</b></span>
+    <span>gamma: <b id="g">–</b></span>
+  </div>
+
+<script>
+const statusEl = document.getElementById('status');
+const ball = document.getElementById('ball');
+const board = document.getElementById('board');
+let tiltX = 0, tiltY = 0, gotEvent = false;
+let x = 0.46, y = 0.46, vx = 0, vy = 0;
+
+function setStatus(text, cls){ statusEl.textContent = text; statusEl.className = cls || ''; }
+
+// A képernyő elforgatásához igazított dőlés
+function onOrient(e){
+  if (e.beta == null && e.gamma == null) return;
+  gotEvent = true;
+  document.getElementById('a').textContent = (e.alpha ?? 0).toFixed(1);
+  document.getElementById('b').textContent = (e.beta ?? 0).toFixed(1);
+  document.getElementById('g').textContent = (e.gamma ?? 0).toFixed(1);
+  const angle = (screen.orientation && screen.orientation.angle) || window.orientation || 0;
+  const b = e.beta || 0, g = e.gamma || 0;
+  if (angle === 90)       { tiltX =  b; tiltY = -g; }
+  else if (angle === -90 || angle === 270) { tiltX = -b; tiltY =  g; }
+  else if (angle === 180) { tiltX = -g; tiltY = -b; }
+  else                    { tiltX =  g; tiltY =  b; }
+  setStatus('Működik, érkeznek az adatok', 'ok');
+}
+
+document.getElementById('start').addEventListener('click', async () => {
+  try {
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+      const res = await DeviceOrientationEvent.requestPermission();
+      if (res !== 'granted') { setStatus('Az engedélyt elutasították: ' + res, 'bad'); return; }
+    }
+    window.addEventListener('deviceorientation', onOrient);
+    setStatus('Várakozás a szenzoradatokra…');
+    setTimeout(() => {
+      if (!gotEvent) setStatus('Nem érkezett adat. Ebben a környezetben a szenzor valószínűleg le van tiltva.', 'bad');
+    }, 2500);
+  } catch (err) {
+    setStatus('Hiba: ' + (err && err.message ? err.message : err), 'bad');
+  }
+});
+
+function loop(){
+  const k = 0.00004;
+  vx = (vx + tiltX * k) * 0.98;
+  vy = (vy + tiltY * k) * 0.98;
+  x += vx; y += vy;
+  if (x < 0.04) { x = 0.04; vx = -vx * 0.4; }
+  if (x > 0.88) { x = 0.88; vx = -vx * 0.4; }
+  if (y < 0.04) { y = 0.04; vy = -vy * 0.4; }
+  if (y > 0.88) { y = 0.88; vy = -vy * 0.4; }
+  ball.style.left = (x * 100) + '%';
+  ball.style.top = (y * 100) + '%';
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
