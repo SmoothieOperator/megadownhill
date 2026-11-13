@@ -351,12 +351,13 @@ var P={
 function bikeById(id){for(var i=0;i<BIKES.length;i++)if(BIKES[i].id===id)return BIKES[i];return BIKES[0];}
 function save(){store.set('mdh_name',P.name);store.set('mdh_coins',P.coins);store.set('mdh_owned',P.owned);store.set('mdh_bike',P.bike);store.set('mdh_sound',P.sound);}
 
+var SPEEDK=0.8;
 /* ---------- track ---------- */
 function mkp(y,z){return {world:{y:y,z:z},camera:{x:0,y:0,z:0},screen:{x:0,y:0,w:0,scale:0}};}
-function Track(seed){this.segs=[];this.y=0;this.slope=0;this.wd=0.6;this.mode='jump';this.events=[];this.zones=[];this.warns=[];this.rnd=mulberry32(seed);}
+function Track(seed){this.steps=[];this.segs=[];this.y=0;this.slope=0;this.wd=0.6;this.mode='jump';this.events=[];this.zones=[];this.warns=[];this.rnd=mulberry32(seed);}
 Track.prototype.add=function(curve,slope,wd,o){
   var n=this.segs.length,y1=this.y,y2=y1+slope*SEG;this.y=y2;this.slope=slope;this.wd=wd;
-  var s={i:n,p1:mkp(y1,n*SEG),p2:mkp(y2,(n+1)*SEG),curve:curve,wd:wd,mode:this.mode,surf:o.surf||'dirt',berm:false,forest:!!o.forest,kind:o.kind||'',crowd:!!o.crowd,sprites:[],coins:[],clip:0,fn:0};
+  var s={i:n,p1:mkp(y1,n*SEG),p2:mkp(y2,(n+1)*SEG),curve:curve,wd:wd,mode:this.mode,surf:o.surf||'dirt',berm:!!o.berm,forest:!!o.forest,kind:o.kind||'',crowd:!!o.crowd,sprites:[],coins:[],clip:0,fn:0};
   this.segs.push(s);return s;
 };
 Track.prototype.setMode=function(m){this.mode=m;this.warns.push({idx:this.segs.length,mode:m,done:false});return this;};
@@ -381,7 +382,8 @@ Track.prototype.sideCoin=function(idx,side){
   this.events.push({type:'hop',idx:idx-5,side:side,target:0.38+this.rnd()*0.22});
 };
 // short rocky step-down inside a technical section
-Track.prototype.step=function(){var w=this.wd;for(var i=0;i<2;i++)this.add(0,-1.4,w,{surf:'rocky',forest:true,kind:'step'});this.slope=-0.6;return this;};
+Track.prototype.step=function(){var w=this.wd;this.segs[this.segs.length-1].lip=true;this.steps.push({idx:this.segs.length,done:false});
+  this.add(0,-2.8,w,{surf:'rocky',forest:true,kind:'step'});this.add(0,-2.2,w,{surf:'rocky',forest:true,kind:'step'});this.slope=-1.2;return this;};
 var JSIZE={s:{kick:5,kh:0.32,table:10,gap:7,land:8,drop:3},m:{kick:7,kh:0.42,table:16,gap:11,land:11,drop:5},l:{kick:9,kh:0.5,table:24,gap:15,land:13,drop:6}};
 Track.prototype.jump=function(o){
   o=o||{};var type=o.type||'table',size=o.size||'m',J=JSIZE[size],i,s0=this.slope,w0=this.wd,jw=size==='s'?0.6:0.78;
@@ -420,7 +422,7 @@ Track.prototype.jump=function(o){
 };
 
 function buildLeogang(){
-  var t=new Track(2026),F={forest:true};
+  var t=new Track(2026);
   function tf(o){o.forest=true;return o;}
   // Rajt + 1. ugratós szakasz
   t.setMode('jump');
@@ -428,54 +430,56 @@ function buildLeogang(){
   t.section(26,0,-0.3,{surf:'meadow',w:0.6,zone:'Rajt – Asitz-csúcs',crowd:true});
   t.section(22,1.5,-0.22,{surf:'meadow',w:0.6,coins:{x:0,every:4}});
   t.jump({type:'table',size:'m',surf:'meadow'});
-  t.section(24,-2,-0.22,{surf:'meadow',w:0.6});
+  t.section(22,9,-0.22,{w:0.6,berm:true});
+  t.section(22,-9,-0.22,{w:0.6,berm:true});
   t.jump({type:'steep',surf:'meadow'});
-  t.section(22,2,-0.2,{w:0.58,side:1});
+  t.section(20,2,-0.2,{w:0.58,side:1});
   t.jump({type:'drop',size:'s'});
-  t.section(24,-1.5,-0.22,{w:0.6});
+  t.section(22,-1.5,-0.22,{w:0.6});
   // 1. fékezős szakasz
   t.setMode('tech');
-  t.section(18,0,-0.6,tf({surf:'roots',w:0.36,zone:'Felső erdő – technikás rész'}));
-  t.section(16,8,-0.65,tf({surf:'roots',w:0.34}));
-  t.section(16,-8,-0.65,tf({surf:'rocky',w:0.34}));
+  t.section(16,0,-1.2,tf({surf:'roots',w:0.2,zone:'Felső erdő – technikás rész'}));
+  t.section(11,14,-1.1,tf({surf:'roots',w:0.18}));
+  t.section(11,-15,-1.2,tf({surf:'rocky',w:0.18}));
   t.step();
-  t.section(14,0,-0.75,tf({surf:'roots',w:0.33,coins:{x:0,every:4}}));
-  t.section(16,9,-0.6,tf({surf:'mud',w:0.34}));
-  t.section(16,-9,-0.6,tf({surf:'roots',w:0.34}));
+  t.section(10,0,-1.4,tf({surf:'roots',w:0.18,coins:{x:0,every:4}}));
+  t.section(11,16,-1.1,tf({w:0.17}));
+  t.section(11,-16,-1.1,tf({surf:'roots',w:0.17}));
   t.step();
-  t.section(16,7,-0.7,tf({surf:'rocky',w:0.33}));
-  t.section(16,-7,-0.7,tf({surf:'roots',w:0.33}));
-  t.section(14,0,-0.55,tf({surf:'mud',w:0.36}));
-  // 2. ugratós szakasz: kis erdei ugratók, majd tisztás
+  t.section(11,13,-1.3,tf({surf:'rocky',w:0.18}));
+  t.section(11,-13,-1.3,tf({surf:'roots',w:0.18}));
+  t.section(12,0,-1.0,tf({w:0.2}));
+  // 2. ugratós szakasz
   t.setMode('jump');
   t.section(22,0,-0.22,tf({w:0.55,zone:'Erdei ugratók'}));
   t.jump({type:'table',size:'s',forest:true});
-  t.section(18,2,-0.2,tf({w:0.55}));
+  t.section(20,8,-0.2,tf({w:0.58,berm:true}));
   t.jump({type:'gap',size:'s',forest:true});
   t.section(24,-2,-0.2,{surf:'meadow',w:0.6,zone:'Tisztás',coins:{x:0,every:5,wave:0.2}});
   t.jump({type:'table',size:'l',surf:'meadow'});
   t.section(20,1.5,-0.22,{surf:'meadow',w:0.6,side:-1});
   t.jump({type:'drop',size:'m',surf:'meadow'});
-  t.section(20,-2,-0.2,{surf:'meadow',w:0.6});
+  t.section(22,-10,-0.2,{w:0.6,berm:true});
   t.jump({type:'steep',surf:'meadow'});
   t.section(22,0,-0.22,{w:0.55});
   // 2. fékezős szakasz: kőkert
   t.setMode('tech');
-  t.section(16,0,-0.65,tf({surf:'rocky',w:0.34,zone:'Kőkert'}));
-  t.section(14,-8,-0.7,tf({surf:'rocky',w:0.32}));
-  t.section(14,8,-0.7,tf({surf:'roots',w:0.32}));
-  t.step();t.section(6,0,-0.6,tf({surf:'rocky',w:0.33}));t.step();
-  t.section(16,-9,-0.62,tf({surf:'mud',w:0.33}));
-  t.section(16,9,-0.62,tf({surf:'roots',w:0.33,coins:{x:0,every:4}}));
-  t.section(14,0,-0.8,tf({surf:'rocky',w:0.32}));
-  t.section(16,-7,-0.6,tf({surf:'roots',w:0.34}));
+  t.section(14,0,-1.3,tf({surf:'rocky',w:0.19,zone:'Kőkert'}));
+  t.section(10,-15,-1.3,tf({surf:'rocky',w:0.17}));
+  t.section(10,15,-1.3,tf({surf:'roots',w:0.17}));
+  t.step();t.section(8,0,-1.2,tf({surf:'rocky',w:0.18}));t.step();
+  t.section(11,-16,-1.15,tf({w:0.17}));
+  t.section(11,16,-1.15,tf({surf:'roots',w:0.17,coins:{x:0,every:4}}));
+  t.section(12,0,-1.5,tf({surf:'rocky',w:0.18}));
+  t.section(11,-14,-1.2,tf({surf:'roots',w:0.18}));
   t.step();
-  t.section(14,0,-0.5,tf({surf:'mud',w:0.36}));
+  t.section(12,0,-1.0,tf({w:0.2}));
   // 3. ugratós szakasz
   t.setMode('jump');
   t.section(24,0,-0.2,{surf:'meadow',w:0.6,zone:'Középső rét'});
   t.jump({type:'gap',size:'m',surf:'meadow'});
-  t.section(18,-2,-0.2,{surf:'meadow',w:0.6,coins:{x:0,every:4}});
+  t.section(22,9,-0.22,{w:0.6,berm:true});
+  t.section(22,-9,-0.22,{w:0.6,berm:true,coins:{x:0,every:4}});
   t.jump({type:'drop',size:'m'});
   t.section(18,2,-0.22,{w:0.58,side:1});
   t.jump({type:'steep'});
@@ -484,20 +488,20 @@ function buildLeogang(){
   t.section(20,-1.5,-0.22,{w:0.58});
   // 3. fékezős szakasz
   t.setMode('tech');
-  t.section(16,0,-0.6,tf({surf:'roots',w:0.35,zone:'Alsó erdő'}));
-  t.section(14,9,-0.62,tf({surf:'roots',w:0.32}));
-  t.section(14,-9,-0.62,tf({surf:'mud',w:0.32}));
-  t.section(14,9,-0.62,tf({surf:'rocky',w:0.32}));
+  t.section(14,0,-1.2,tf({surf:'roots',w:0.2,zone:'Alsó erdő'}));
+  t.section(10,16,-1.2,tf({surf:'roots',w:0.17}));
+  t.section(10,-16,-1.2,tf({w:0.17}));
+  t.section(10,16,-1.2,tf({surf:'rocky',w:0.17}));
   t.step();
-  t.section(14,0,-0.78,tf({surf:'roots',w:0.33}));
-  t.section(16,-8,-0.6,tf({surf:'roots',w:0.33,coins:{x:0,every:4}}));
+  t.section(10,0,-1.5,tf({surf:'roots',w:0.18}));
+  t.section(11,-15,-1.2,tf({surf:'roots',w:0.18,coins:{x:0,every:4}}));
   t.step();
-  t.section(16,6,-0.55,tf({surf:'mud',w:0.36}));
-  // Cél-aréna (ugratós)
+  t.section(12,10,-1.1,tf({w:0.2}));
+  // Cél-aréna
   t.setMode('jump');
   t.section(24,0,-0.2,{w:0.6,zone:'Cél-aréna',crowd:true});
   t.jump({type:'table',size:'m',crowd:true});
-  t.section(14,0,-0.2,{surf:'meadow',w:0.65,crowd:true});
+  t.section(22,-9,-0.2,{w:0.62,berm:true,crowd:true});
   t.jump({type:'gap',size:'l',surf:'meadow',crowd:true});
   t.section(30,0,-0.12,{surf:'meadow',w:0.7,crowd:true,coins:{x:0,every:4}});
   t.finish=t.segs.length;
@@ -507,7 +511,7 @@ function buildLeogang(){
   decorate(t);
   return t;
 }
-function edgeOff(s,sd){return s.wd+0.22;}
+function edgeOff(s,sd){var outer=s.berm?(s.curve>0?-1:1):0;return s.wd+(s.mode==='tech'?0.1:0.22)+(outer===sd?0.32:0);}
 function decorate(t){
   var r=mulberry32(99),segs=t.segs;
   for(var i=0;i<segs.length;i++){
@@ -531,6 +535,8 @@ function decorate(t){
     }
     if(s.crowd&&i%2===0&&r()<0.14)s.sprites.push({t:'flag',off:(r()<0.5?-1:1)*(edgeOff(s,1)+0.8),seed:r()});
   }
+  for(var q=0;q<t.steps.length;q++){var ls=segs[t.steps[q].idx-1];ls.sprites.push({t:'sign',off:-(ls.wd+0.09)});ls.sprites.push({t:'sign',off:ls.wd+0.09});
+    var ls2=segs[t.steps[q].idx-10];if(ls2){ls2.sprites.push({t:'sign',off:-(ls2.wd+0.09)});ls2.sprites.push({t:'sign',off:ls2.wd+0.09});}}
   segs[6].sprites.push({t:'banner',off:0,text:'RAJT'});
   segs[t.finish].sprites.push({t:'banner',off:0,text:'CÉL'});
 }
@@ -600,24 +606,33 @@ function project(p,camX,camY,camZ){
 }
 function drawSegment(s,n,maxy){
   var nx=segs[s.i+1]||s,a=s.p1.screen,b=s.p2.screen;
-  var x1=a.x,y1=Math.min(a.y,maxy)+1.5,x2=b.x,y2=b.y,u1=a.w,u2=b.w,w1=u1*s.wd,w2=u2*nx.wd;
+  var yA=Math.min(a.y,maxy),x1=a.x,y1=yA+1.5,x2=b.x,y2=b.y,u1=a.w,u2=b.w,w1=u1*s.wd,w2=u2*nx.wd;
   var f=n/DRAW;f=f*f*0.92;var dk=s.forest?0.72:1;
   var alt=Math.floor(s.i/3)%2,pal=PAL[s.surf]||PAL.dirt;
-  ctx.fillStyle=mix(s.forest?(alt?[56,70,40]:[52,66,38]):(alt?pal.g1:pal.g2),f,dk);ctx.fillRect(-W,y2,W*3,y1-y2+1);
+  ctx.fillStyle=mix(s.forest?[54,68,39]:(s.surf==='meadow'?[100,152,69]:[68,108,56]),f,dk);ctx.fillRect(-W,y2,W*3,yA-y2+0.5);
   var e1=w1+u1*0.07,e2=w2+u2*0.07;
-  poly(x1-e1,y1,x1+e1,y1,x2+e2,y2,x2-e2,y2,mix([112,84,56],f,dk));
+  poly(x1-e1,y1,x1+e1,y1,x2+e2,y2,x2-e2,y2,mix([126,92,60],f,dk));
   var rc=s.kind==='gap'?PIT:(s.kind==='step'?[96,74,52]:ROADC);
   poly(x1-w1,y1,x1+w1,y1,x2+w2,y2,x2-w2,y2,mix(rc,f,dk));
-  var hsh=(s.i*2654435761>>>0)%97;
-  if(n<55&&s.kind!=='gap'&&(s.surf==='rocky'||hsh%6===0)){
-    ctx.fillStyle=mix([122,118,110],f,dk);
+  var hsh=(s.i*2654435761>>>0)%97,dyy=y1-y2;
+  if(n<55&&s.kind!=='gap'&&(s.surf==='rocky'?hsh%2===0:hsh%7===0)){
     var cnt=s.surf==='rocky'?2:1;
-    for(var q=0;q<cnt;q++){var rx=(((s.i*53+q*29)%17)/17-0.5)*1.6;ctx.beginPath();ctx.ellipse(x1+w1*rx,y1-(y1-y2)*0.3,Math.max(1,w1*0.09),Math.max(1,(y1-y2)*0.5),0,0,6.2832);ctx.fill();}
+    for(var q=0;q<cnt;q++){var rx=(((s.i*53+q*29)%17)/17-0.5)*1.6,rs=0.06+((s.i*13+q*7)%5)*0.015,cx0=x1+w1*rx,cy0=y1-dyy*0.3;
+      ctx.fillStyle=mix([118,114,106],f,dk);ctx.beginPath();ctx.ellipse(cx0,cy0,Math.max(1,w1*rs),Math.max(1,dyy*0.55),0,0,6.2832);ctx.fill();
+      ctx.fillStyle=mix([168,164,154],f,dk);ctx.beginPath();ctx.ellipse(cx0-w1*rs*0.2,cy0-dyy*0.15,Math.max(0.5,w1*rs*0.55),Math.max(0.5,dyy*0.25),0,0,6.2832);ctx.fill();}
   }
-  if(n<70&&s.kind!=='gap'&&((s.surf==='roots'&&s.i%3===0)||hsh%11===0)){
-    var th=Math.max(1,(y1-y2)*0.4),tw=s.i%2?1:-1;
-    poly(x1-w1*1.05,y1-th*(tw>0?0.1:0.8),x1+w1*1.05,y1-th*(tw>0?0.8:0.1),x2+w2*1.05,y1-th*(tw>0?1.1:0.4),x2-w2*1.05,y1-th*(tw>0?0.4:1.1),mix([84,58,36],f,dk));
+  if(n<60&&s.kind!=='gap'&&s.kind!=='step'&&((s.surf==='roots'&&hsh%3===0)||hsh%13===0)){
+    var side=(hsh%2)?1:-1,lw=Math.max(1,w1*0.04);
+    ctx.strokeStyle=mix([76,52,32],f,dk);ctx.lineWidth=lw;ctx.lineCap='round';
+    var sx0=x1+side*w1*1.2,sy0=y1-dyy*0.2,ex=x1+side*w1*(0.7-((hsh*7)%10)/10*1.5),ey=y1-dyy*(0.45+((hsh*3)%5)/10);
+    ctx.beginPath();ctx.moveTo(sx0,sy0);ctx.quadraticCurveTo((sx0+ex)/2,(sy0+ey)/2+dyy*0.2,ex,ey);
+    var bx=lerp(sx0,ex,0.45),by=lerp(sy0,ey,0.45);ctx.moveTo(bx,by);ctx.quadraticCurveTo(bx-side*w1*0.1,by-dyy*0.5,bx-side*w1*0.3,by-dyy*0.75);
+    if(hsh%2===0){var c2x=lerp(sx0,ex,0.75),c2y=lerp(sy0,ey,0.75);ctx.moveTo(c2x,c2y);ctx.quadraticCurveTo(c2x-side*w1*0.1,c2y+dyy*0.2,c2x-side*w1*0.22,c2y+dyy*0.45);}
+    ctx.stroke();
+    ctx.lineWidth=Math.max(0.6,lw*0.5);ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(ex-side*w1*0.12,ey-dyy*0.3);ctx.stroke();
   }
+  if(s.lip&&n<90){ctx.fillStyle=mix([204,176,134],f,dk);ctx.fillRect(x2-w2*1.6,y2-1,w2*3.2,Math.max(3,dyy*0.45));
+    ctx.fillStyle=mix([40,28,18],f,dk);ctx.fillRect(x2-w2*1.6,y2-Math.max(2,dyy*0.15),w2*3.2,Math.max(2,dyy*0.15));}
   if(s.kind==='step'&&n<80){ctx.fillStyle=mix([70,52,36],f,dk);ctx.fillRect(x1-w1,y2,w1*2,Math.max(2,(y1-y2)*0.35));}
   if(s.kind==='finish'){
     var cells=10,cw=(w1*2)/cells;for(var c=0;c<cells;c++){ctx.fillStyle=(c%2)?'#111':'#fff';ctx.fillRect(x1-w1+c*cw,y2,cw+1,Math.max(2,y1-y2));}
@@ -627,7 +642,7 @@ function renderWorld(){
   var base=findSeg(G.position),basePct=(G.position-base.i*SEG)/SEG;
   var pz=G.position+PLAYERZ;
   var pY=G.air?G.air.y:roadY(pz);
-  var camY=pY+CAMH+G.camDrop,camZ=G.position;
+  var camY=pY+CAMH+(G.camOff||0)+G.camDrop,camZ=G.position;
   var x=0,dx=-(base.curve*basePct),maxy=H*1.5,camX=G.x*ROAD,yaw=G.head*0.9;
   frameSegs.length=0;
   for(var n=0;n<DRAW;n++){
@@ -654,11 +669,17 @@ function drawSprites(){
     var bx=s.p1.screen.x,by=s.p1.screen.y,f=s.fn/DRAW;f=f*f*0.9;var dk=s.forest?0.75:1;
     var clipped=false;
     if(by>s.clip+1){ctx.save();ctx.beginPath();ctx.rect(-W,-H*3,W*3,s.clip+H*3);ctx.clip();clipped=true;}
+    if(s.berm){
+      var k2b=s.p2.screen.scale*W/2,nb=segs[s.i+1]||s,bsd=s.curve>0?-1:1;
+      var bo1=bx+bsd*k*s.wd*ROAD,bo2=s.p2.screen.x+bsd*k2b*nb.wd*ROAD,bh1=k*ROAD*0.6,bh2=k2b*ROAD*0.6;
+      poly(bo1,by+1,bo1+bsd*k*ROAD*0.34,by-bh1+1,bo2+bsd*k2b*ROAD*0.34,s.p2.screen.y-bh2-1,bo2,s.p2.screen.y-1,mix([150,112,74],f,dk));
+      poly(bo1+bsd*k*ROAD*0.3,by-bh1*0.9,bo1+bsd*k*ROAD*0.36,by-bh1,bo2+bsd*k2b*ROAD*0.36,s.p2.screen.y-bh2,bo2+bsd*k2b*ROAD*0.3,s.p2.screen.y-bh2*0.9,mix([112,82,54],f,dk));
+    }
     if(s.kind!=='start'&&s.fn<100&&!s.crowd){
       var k2=s.p2.screen.scale*W/2,nx=segs[s.i+1]||s;
       for(var sd=-1;sd<=1;sd+=2){
-        var o1=sd*edgeOff(s,sd),o2=sd*edgeOff(nx,sd);
-        var ax1=bx+k*o1*ROAD,ay1=by-k*640,ax2=s.p2.screen.x+k2*o2*ROAD,ay2=s.p2.screen.y-k2*640;
+        var o1=sd*edgeOff(s,sd),o2=sd*edgeOff(nx,sd),th1=(s.berm&&sd===(s.curve>0?-1:1))?ROAD*0.6:0,th2=(nx.berm&&sd===(nx.curve>0?-1:1))?ROAD*0.6:0;
+        var ax1=bx+k*o1*ROAD,ay1=by-k*(640+th1),ax2=s.p2.screen.x+k2*o2*ROAD,ay2=s.p2.screen.y-k2*(640+th2);
         ctx.fillStyle=mix((s.i%2)?[38,88,205]:[236,240,244],f,dk);
         ctx.beginPath();ctx.moveTo(ax1,ay1);ctx.lineTo(ax2,ay2);ctx.lineTo(ax2,ay2+Math.max(1,k2*80));ctx.lineTo(ax1,ay1+Math.max(1,k*80));ctx.closePath();ctx.fill();
       }
@@ -670,7 +691,8 @@ function drawSprites(){
       else if(sp.t==='fan')drawFan(sx,by,k,sp.seed,t,f);
       else if(sp.t==='post')drawPost(sx,by,k,f);
       else if(sp.t==='flag')drawFlag(sx,by,k,sp.seed,t,f);
-      else if(sp.t==='rock')drawRock(sx,by,k,sp.seed,f);
+      else if(sp.t==='rock'){if(s.fn>5)drawRock(sx,by,k*0.4,sp.seed,f);}
+      else if(sp.t==='sign')drawSign(sx,by,k,f,dk);
       else if(sp.t==='banner')drawBanner(sx,by,k,sp.text,f);
     }
     for(j=0;j<s.coins.length;j++){
@@ -687,6 +709,14 @@ function drawTree(sx,sy,k,seed,f,big,dk){
   ctx.fillStyle=cA;ctx.beginPath();ctx.moveTo(sx-w/2,sy-h*0.16);ctx.lineTo(sx+w/2,sy-h*0.16);ctx.lineTo(sx,sy-h*0.62);ctx.fill();
   ctx.fillStyle=cB;ctx.beginPath();ctx.moveTo(sx-w*0.4,sy-h*0.4);ctx.lineTo(sx+w*0.4,sy-h*0.4);ctx.lineTo(sx,sy-h*0.84);ctx.fill();
   ctx.fillStyle=cA;ctx.beginPath();ctx.moveTo(sx-w*0.27,sy-h*0.62);ctx.lineTo(sx+w*0.27,sy-h*0.62);ctx.lineTo(sx,sy-h);ctx.fill();
+}
+
+function drawSign(sx,sy,k,f,dk){
+  var h=1500*k;if(h<4)return;var r=h*0.22;
+  ctx.fillStyle=mix([60,60,60],f,dk);ctx.fillRect(sx-h*0.02,sy-h,h*0.04,h);
+  ctx.fillStyle=mix([242,194,48],f);ctx.beginPath();ctx.moveTo(sx,sy-h-r);ctx.lineTo(sx+r,sy-h);ctx.lineTo(sx,sy-h+r);ctx.lineTo(sx-r,sy-h);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#111';ctx.lineWidth=Math.max(1,r*0.12);ctx.stroke();
+  ctx.fillStyle='#111';ctx.fillRect(sx-r*0.08,sy-h-r*0.55,r*0.16,r*0.7);ctx.fillRect(sx-r*0.08,sy-h+r*0.25,r*0.16,r*0.16);
 }
 function drawFan(sx,sy,k,seed,t,f){
   var h=1750*k;if(h<3)return;
@@ -1125,7 +1155,7 @@ function setGameUI(on){show('hud',on);if(!on)setLevers(false);if(!on){hideGauge(
 function resolveEvent(ev){
   var p=gauge.v;hideGauge();
   if(ev.type==='jump'&&ev.jt==='drop'){
-    var Dd=ev.idealD*(0.85+0.3*Math.min(1.4,G.speed/(0.5*MAXU)));
+    var Dd=ev.idealD*(0.85+0.3*Math.min(1.4,G.speed/(0.4*MAXU)));
     launch(Math.min(1.3,Math.max(0.35,Dd/Math.max(G.speed,1))),70,false,false,false);G.air.ev=ev;G.air.D=Dd;G.air.lift=p;sfxWhoosh();
     return;
   }
@@ -1134,7 +1164,7 @@ function resolveEvent(ev){
       if(ev.jt==='gap')toast('Nem ugrattál!');else{G.speed*=0.6;toast('Nem ugrattál, lelassultál');}
       return;
     }
-    var spF=0.8+0.2*Math.min(1.4,G.speed/(0.55*MAXU));
+    var spF=0.8+0.2*Math.min(1.4,G.speed/(0.45*MAXU));
     takeoff(ev,ev.idealD*(p/ev.target)*spF);
   } else {
     if(p<0.06)return;
@@ -1231,7 +1261,7 @@ function raceStep(dt){
   var tech=seg.mode==='tech';
   setLevers(tech);
   var f=tech?Math.max(input.front,keys.front?1:0):0,r=tech?Math.max(input.rear,keys.rear?1:0):0;
-  var maxU=MAXU*BIKE.max,sp=G.speed/MAXU,slope=(seg.p2.world.y-seg.p1.world.y)/SEG,steep=Math.max(0,-slope);
+  var maxU=MAXU*BIKE.max*SPEEDK,sp=G.speed/MAXU,slope=(seg.p2.world.y-seg.p1.world.y)/SEG;if(tech&&seg.kind!=='step')slope*=0.5;var steep=Math.max(0,-slope);
   var rearLock=r>0.6?(r-0.6)/0.4:0;
   G.comp=lerp(G.comp,f*0.85*Math.min(1,0.3+sp*1.5),Math.min(1,dt*7));
   if(G.air){
@@ -1239,14 +1269,14 @@ function raceStep(dt){
     if(G.air){G.head=clamp(G.head+G.steer*gdt*0.8,-1.1,1.1);G.x+=Math.sin(G.head)*sp*gdt*2.3;}
   } else {
     if(seg.kind==='gap')return crash('Beestél a gödörbe!');
-    var grav=clamp(0.35-1.6*slope,-1.4,1.7),A=MAXU*0.5*BIKE.accel;
+    var grav=clamp(0.35-1.6*slope,-1.4,1.7),A=MAXU*0.5*BIKE.accel*SPEEDK;
     G.speed+=(A*grav-A*1.2*Math.pow(G.speed/maxU,2))*gdt;
     G.speed-=MAXU*(0.95*f+0.5*r*(1-0.35*rearLock))*BIKE.brake*gdt;
     if(G.speed<0)G.speed=0;sp=G.speed/MAXU;
     var outer=seg.berm?(seg.curve>0?-1:1):0,onOuter=outer!==0&&G.x*outer>0,ax=Math.abs(G.x);
     if(ax>seg.wd&&!onOuter){G.speed-=G.speed*1.1*gdt;G.shake=Math.max(G.shake,0.5);}
     // bike-like steering: lean -> turn rate, the track bends under you
-    var omega=G.steer*2.2,curveRate=seg.curve*sp*0.4;
+    var omega=G.steer*3.0,curveRate=seg.curve*sp*0.4;
     G.head+=(omega-curveRate)*gdt;
     G.head*=(1-0.45*gdt);
     if(seg.surf==='roots')G.head+=Math.sin(pz*0.0031)*Math.sin(pz*0.0071+2)*sp*gdt*1.3;
@@ -1255,16 +1285,16 @@ function raceStep(dt){
     G.x+=Math.sin(G.head)*sp*gdt*2.3;
     // grip
     var SG={roots:0.9,mud:0.82,rocky:0.9};
-    var lat=sp*Math.abs(omega),Gr=0.7*BIKE.grip*(1-0.25*f*f)*(SG[seg.surf]||1);
+    var lat=sp*Math.abs(omega),Gr=0.7*BIKE.grip*(seg.berm?2.1:1)*(1-0.25*f*f)*(SG[seg.surf]||1);
     if(lat>Gr)G.slip+=((lat/Gr-1)*4+0.5)*gdt;
     if(rearLock>0&&sp>0.12)G.slip+=rearLock*(Math.abs(seg.curve)*0.09+steep*1.4)*sp*gdt*1.6;
     if(lat<=Gr&&rearLock===0)G.slip=Math.max(0,G.slip-gdt*1.4);
     if(G.slip>=1)return crash(rearLock>0?'Elfarolt a bringa!':'Kicsúsztál a kanyarban!');
     // endo: only front brake on a steep section
-    if(f>0.65&&r<0.35&&steep>0.28&&sp>0.22)G.endo+=(f-0.6)*(steep-0.2)*sp*gdt*16;else G.endo=Math.max(0,G.endo-gdt*2);
+    if(f>0.8&&r<0.25&&steep>0.45&&sp>0.25)G.endo+=(f-0.75)*(steep-0.4)*sp*gdt*12;else G.endo=Math.max(0,G.endo-gdt*2);
     // technical section: not braking enough on the steep -> over the bars
-    if(tech&&steep>0.45&&sp>0.45)G.endo+=(sp-0.45)*steep*gdt*14;
-    if(seg.kind==='step'&&segs[seg.i-1].kind!=='step'&&sp>0.36)return crash('Orra buktál a letörésen!');
+    if(tech&&steep>0.45&&sp>0.5)G.endo+=(sp-0.5)*steep*gdt*8;
+    if(seg.kind==='step'&&segs[seg.i-1].kind!=='step'&&sp>0.42)return crash('Orra buktál a letörésen!');
     if(seg.kind==='step'){G.shake=Math.max(G.shake,0.9);G.comp=Math.max(G.comp,0.8);}
     if(G.endo>=1)return crash(tech&&f<0.65?'Orra buktál, túl gyors voltál!':'Átestél a kormányon!');
     if(ax>edgeOff(seg,G.x>0?1:-1))return crash('Kimentél a pályáról!');
@@ -1286,6 +1316,7 @@ function raceStep(dt){
     if(!w.done&&idx>=w.idx-(w.mode==='tech'?70:45)&&idx<w.idx+5){w.done=true;if(w.idx>20)warn(w.mode==='tech'?'Fékezős szakasz jön!':'Ugratós szakasz, nincs fék!',w.mode);}}
   for(var ei=G.evIdx;ei<TRACK.events.length&&ei<G.evIdx+3;ei++){var we=TRACK.events[ei];
     if(we.type==='jump'&&!we.warned&&idx>=we.idx-80&&idx<we.idx){we.warned=true;warn(we.jt==='drop'?'Letörés jön!':(we.jt==='steep'?'Meredek ugrató jön!':(we.jt==='gap'?'Gödrös ugrató jön!':'Ugrató jön!')),'jump');}}
+  for(var si=0;si<TRACK.steps.length;si++){var stp=TRACK.steps[si];if(!stp.done&&idx>=stp.idx-34&&idx<stp.idx){stp.done=true;warn('Letörés!','tech');}}
   var ev=TRACK.events[G.evIdx];
   if(ev){
     var win=ev.type==='jump'?44:22;
@@ -1425,15 +1456,16 @@ function update(dt){
   else if(G.state==='finished')finishStep(dt);
   G.rattleCd-=dt;G.shake=Math.max(0,G.shake-dt*2.5);
   var seg=findSeg(G.position+PLAYERZ),sp=G.speed/MAXU;
+  if(!G.air)G.camOff=lerp(G.camOff||0,Math.max(0,roadY(G.position+60)-roadY(G.position+PLAYERZ)),Math.min(1,dt*6));
   G.skyX+=seg.curve*sp*dt*0.06;
   G.shadeAmt=lerp(G.shadeAmt||0,seg.forest?0.3:0,Math.min(1,dt*1.5));
   if(G.state!=='crashed'){
-    var target=(seg.berm?-seg.curve*0.035:-seg.curve*0.008)-G.steer*0.06;
+    var target=seg.berm?(-Math.sign(seg.curve)*Math.min(0.7,sp*Math.abs(seg.curve)*0.16)-G.steer*0.05):(-seg.curve*0.006-G.steer*0.1);
     if(G.rearV>0.6&&sp>0.12)target+=Math.sin(G.fish)*0.03;
-    G.roll=lerp(G.roll,target,Math.min(1,dt*4));G.camDrop=lerp(G.camDrop,0,Math.min(1,dt*3));
+    G.roll=lerp(G.roll,target,Math.min(1,dt*3));G.camDrop=lerp(G.camDrop,0,Math.min(1,dt*3));
   }
   var sum=0,n=0;for(var i=0;i<14;i++){var s=segs[seg.i+i];if(!s)break;sum+=(s.p2.world.y-s.p1.world.y)/SEG;n++;}
-  var avg=n?sum/n:0,lift=(G.air&&G.air.lift!==undefined)?G.air.lift:0,tp=-CAMD*avg*H/2*0.85+G.comp*H*0.03-lift*H*0.12;G.pitch=lerp(G.pitch,tp,Math.min(1,dt*3));
+  var avg=n?sum/n:0,lift=(G.air&&G.air.lift!==undefined)?G.air.lift:0,tp=-CAMD*avg*H/2*(seg.mode==='tech'?0.74:0.85)+G.comp*H*0.03-lift*H*0.12;G.pitch=lerp(G.pitch,tp,Math.min(1,dt*3));
   var maxPos=(segs.length-DRAW-2)*SEG;if(G.position>maxPos)G.position=maxPos;
   updateHUD();updateAudio(dt);
   $('vig').style.opacity=G.state==='race'?clamp((Math.max(G.slip,G.endo)-0.15)*1.1,0,0.9):0;
