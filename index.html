@@ -102,21 +102,36 @@ table.lb td.t{font-family:var(--cond);font-weight:700;font-size:20px;white-space
 #rotate{position:fixed;left:0;top:0;right:0;bottom:0;background:#0e1316;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--cond);font-size:30px;font-weight:700;z-index:50;padding:30px}
 @media (max-width:760px){.bike{width:calc(50% - 12px)}.logo{font-size:48px}}
 @media (prefers-reduced-motion: reduce){.show,.showlong{animation-duration:2s}}
-/* analog brake levers */
-.lever{position:fixed;top:0;width:24vw;height:24vw;max-width:300px;max-height:300px;z-index:5;touch-action:none}
+/* analog brake levers (1/8 circle) */
+.lever{position:fixed;top:30vh;width:27vw;max-width:340px;z-index:5;touch-action:none}
 .lever.left{left:0}
 .lever.right{right:0}
-.lever svg{width:100%;height:100%;display:block;overflow:visible}
+.lever svg{width:100%;height:auto;display:block;overflow:visible}
 .lever.right svg{transform:scaleX(-1)}
-.lever .track{fill:none;stroke:rgba(255,255,255,.28);stroke-width:5}
+.lever .track{fill:none;stroke:rgba(255,255,255,.3);stroke-width:4;stroke-dasharray:3 4}
 .lever .fill{fill:none;stroke:#ff5a48;stroke-width:5;stroke-linecap:round}
-.lever .blade{fill:#d4d9dd;stroke:#4d555c;stroke-width:1.4}
-.lever .pivot{fill:#30363b;stroke:#8e969c;stroke-width:1.5}
-.lever .lvl{position:absolute;top:60%;font-family:var(--cond);font-weight:700;font-size:17px;text-shadow:0 1px 3px #000;opacity:.9;white-space:nowrap}
-.lever.left .lvl{left:8px}
-.lever.right .lvl{right:8px}
+.lever .lvl{font-family:var(--cond);font-weight:700;font-size:17px;text-shadow:0 1px 3px #000;opacity:.9;white-space:nowrap;margin-top:2px}
+.lever.left .lvl{padding-left:10px}
+.lever.right .lvl{text-align:right;padding-right:10px}
+/* warning banner */
+#warn{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 64px);transform:translateX(-50%);z-index:8;pointer-events:none;opacity:0;
+  font-family:var(--cond);font-weight:800;font-style:italic;font-size:30px;padding:8px 22px;border-radius:10px;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.45)}
+#warn.jump{background:#c8102e;color:#fff}
+#warn.tech{background:repeating-linear-gradient(-45deg,#f2c230 0 16px,#1b1b1b 16px 32px);color:#fff;text-shadow:0 0 4px #000,0 0 8px #000}
+#warn.go{animation:wiggle 2.4s ease-out forwards}
+@keyframes wiggle{
+ 0%{opacity:0;transform:translateX(-50%) scale(.5)}
+ 8%{opacity:1;transform:translateX(-50%) scale(1.12) rotate(-5deg)}
+ 16%{transform:translateX(-50%) scale(1.05) rotate(5deg)}
+ 24%{transform:translateX(-50%) scale(1.08) rotate(-4deg)}
+ 32%{transform:translateX(-50%) scale(1.02) rotate(3deg)}
+ 40%{transform:translateX(-50%) rotate(-2deg)}
+ 48%{transform:translateX(-50%) rotate(1deg)}
+ 56%{transform:translateX(-50%) rotate(0deg)}
+ 85%{opacity:1;transform:translateX(-50%)}
+ 100%{opacity:0;transform:translateX(-50%) translateY(-8px)}}
 /* jump power gauge */
-#gauge{position:fixed;left:1.2vw;top:calc(min(24vw,300px) + 1vh);width:15vw;max-width:150px;height:52vh;z-index:5;touch-action:none;text-align:center}
+#gauge{position:fixed;left:1.2vw;top:20vh;width:15vw;max-width:150px;height:52vh;z-index:5;touch-action:none;text-align:center}
 #gauge svg{width:100%;height:calc(100% - 44px);display:block;overflow:visible}
 #gLabel{font-family:var(--cond);font-weight:700;font-size:19px;text-shadow:0 2px 4px #000;line-height:1.05;height:44px}
 #gLabel small{display:block;font-size:14px;font-weight:600;opacity:.85}
@@ -139,23 +154,40 @@ table.lb td.t{font-family:var(--cond);font-weight:700;font-size:20px;white-space
 </div>
 
 <div id="leverL" class="lever left hidden">
-  <svg viewBox="0 0 100 100" aria-label="Hátsó fék">
-    <path class="track" d="M 92 8 A 84 84 0 0 1 8 92"/>
-    <path class="fill" id="arcL" d="M 92 8 A 84 84 0 0 1 8 92" stroke-dasharray="132 132" stroke-dashoffset="132"/>
-    <g id="lvL" transform="rotate(3 8 8)"><path class="blade" d="M8 3 L84 5.5 Q93 8 84 11 L8 13 Z"/></g>
-    <circle class="pivot" cx="8" cy="8" r="7"/>
+  <svg viewBox="-8 -4 140 108" aria-label="Hátsó fék">
+    <defs><linearGradient id="blL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1f3f5"/><stop offset=".55" stop-color="#b6bdc3"/><stop offset="1" stop-color="#78818a"/></linearGradient></defs>
+    <path class="track" d="M 124 22 A 110 110 0 0 1 91.8 99.8"/>
+    <path class="fill" id="arcL" d="M 124 22 A 110 110 0 0 1 91.8 99.8" stroke-dasharray="86.4 86.4" stroke-dashoffset="86.4"/>
+    <g id="lvL" transform="rotate(0 14 22)">
+      <path d="M18 16 C45 13, 85 15, 112 19 Q125 21 124 26 Q123 32 112 31 C85 31, 45 30, 18 28 Z" fill="url(#blL)" stroke="#4d555c" stroke-width="1.3"/>
+      <g fill="#8a9298"><circle cx="76" cy="23.2" r="1.6"/><circle cx="84" cy="23.6" r="1.6"/><circle cx="92" cy="24" r="1.6"/><circle cx="100" cy="24.4" r="1.6"/></g>
+      <circle cx="119" cy="26" r="5.5" fill="url(#blL)" stroke="#4d555c" stroke-width="1.3"/>
+    </g>
+    <rect x="-6" y="8" width="34" height="28" rx="7" fill="#2e3338" stroke="#69727a" stroke-width="1.3"/>
+    <rect x="1" y="-2" width="21" height="13" rx="3" fill="#3a4046" stroke="#69727a" stroke-width="1.2"/>
+    <rect x="4" y="1" width="15" height="4" rx="1.5" fill="#c8102e"/>
+    <circle cx="14" cy="22" r="5" fill="#9aa2a8" stroke="#2e3338" stroke-width="2"/>
   </svg>
   <div class="lvl">Hátsó fék</div>
 </div>
 <div id="leverR" class="lever right hidden">
-  <svg viewBox="0 0 100 100" aria-label="Első fék">
-    <path class="track" d="M 92 8 A 84 84 0 0 1 8 92"/>
-    <path class="fill" id="arcR" d="M 92 8 A 84 84 0 0 1 8 92" stroke-dasharray="132 132" stroke-dashoffset="132"/>
-    <g id="lvR" transform="rotate(3 8 8)"><path class="blade" d="M8 3 L84 5.5 Q93 8 84 11 L8 13 Z"/></g>
-    <circle class="pivot" cx="8" cy="8" r="7"/>
+  <svg viewBox="-8 -4 140 108" aria-label="Első fék">
+    <defs><linearGradient id="blR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1f3f5"/><stop offset=".55" stop-color="#b6bdc3"/><stop offset="1" stop-color="#78818a"/></linearGradient></defs>
+    <path class="track" d="M 124 22 A 110 110 0 0 1 91.8 99.8"/>
+    <path class="fill" id="arcR" d="M 124 22 A 110 110 0 0 1 91.8 99.8" stroke-dasharray="86.4 86.4" stroke-dashoffset="86.4"/>
+    <g id="lvR" transform="rotate(0 14 22)">
+      <path d="M18 16 C45 13, 85 15, 112 19 Q125 21 124 26 Q123 32 112 31 C85 31, 45 30, 18 28 Z" fill="url(#blR)" stroke="#4d555c" stroke-width="1.3"/>
+      <g fill="#8a9298"><circle cx="76" cy="23.2" r="1.6"/><circle cx="84" cy="23.6" r="1.6"/><circle cx="92" cy="24" r="1.6"/><circle cx="100" cy="24.4" r="1.6"/></g>
+      <circle cx="119" cy="26" r="5.5" fill="url(#blR)" stroke="#4d555c" stroke-width="1.3"/>
+    </g>
+    <rect x="-6" y="8" width="34" height="28" rx="7" fill="#2e3338" stroke="#69727a" stroke-width="1.3"/>
+    <rect x="1" y="-2" width="21" height="13" rx="3" fill="#3a4046" stroke="#69727a" stroke-width="1.2"/>
+    <rect x="4" y="1" width="15" height="4" rx="1.5" fill="#c8102e"/>
+    <circle cx="14" cy="22" r="5" fill="#9aa2a8" stroke="#2e3338" stroke-width="2"/>
   </svg>
   <div class="lvl">Első fék</div>
 </div>
+<div id="warn"></div>
 
 <div id="gauge" class="hidden">
   <div id="gLabel">Ugratási erő<small>húzd felfelé</small></div>
@@ -222,7 +254,7 @@ table.lb td.t{font-family:var(--cond);font-weight:700;font-size:20px;white-space
       <button id="btnBack" class="btn">Másik bringa</button>
       <button id="btnLb" class="btn">Ranglista</button>
     </div>
-    <p class="hint">Kormányzás: döntsd az iPadet, mintha kormányt fognál. Jobb felső fékkar: első fék, bal felső: hátsó fék. Minél lejjebb húzod a kart, annál erősebben fog. Csak hátsó fékkel a bringa farol, meredeken csak első fékkel átbukhatsz a kormányon. Ugrató előtt bal oldalt megjelenik az erőmérő: húzd fel a célkereszt magasságáig.<br>Billentyűzettel: ←/→ kormány, X első fék, Z hátsó fék, ↑/↓ ugratási erő, 1–3 trükk.</p>
+    <p class="hint">Kormányzás: döntsd az iPadet, mintha kormányt fognál. A pálya ugratós és fékezős szakaszokból áll, mindkettőt előre jelzi a játék. Ugratós szakaszon nincs fék: ugrató előtt bal oldalt megjelenik az erőmérő, húzd fel a célkereszt magasságáig. Letörésnél ugyanez az erőmérő azt adja meg, mennyire emeled meg a bringa elejét. Fékezős szakaszon a két szélén megjelennek a fékkarok: jobb az első, bal a hátsó fék, minél lejjebb húzod, annál erősebben fog.<br>Billentyűzettel: ←/→ kormány, X első fék, Z hátsó fék, ↑/↓ ugratási erő, 1–3 trükk.</p>
   </div>
 </div>
 
@@ -321,15 +353,15 @@ function save(){store.set('mdh_name',P.name);store.set('mdh_coins',P.coins);stor
 
 /* ---------- track ---------- */
 function mkp(y,z){return {world:{y:y,z:z},camera:{x:0,y:0,z:0},screen:{x:0,y:0,w:0,scale:0}};}
-function Track(seed){this.segs=[];this.y=0;this.slope=0;this.wd=0.6;this.events=[];this.zones=[];this.rnd=mulberry32(seed);this.berms=0;}
+function Track(seed){this.segs=[];this.y=0;this.slope=0;this.wd=0.6;this.mode='jump';this.events=[];this.zones=[];this.warns=[];this.rnd=mulberry32(seed);}
 Track.prototype.add=function(curve,slope,wd,o){
   var n=this.segs.length,y1=this.y,y2=y1+slope*SEG;this.y=y2;this.slope=slope;this.wd=wd;
-  var s={i:n,p1:mkp(y1,n*SEG),p2:mkp(y2,(n+1)*SEG),curve:curve,wd:wd,surf:o.surf||'dirt',berm:!!o.berm,forest:!!o.forest,kind:o.kind||'',crowd:!!o.crowd,sprites:[],coins:[],clip:0,fn:0};
+  var s={i:n,p1:mkp(y1,n*SEG),p2:mkp(y2,(n+1)*SEG),curve:curve,wd:wd,mode:this.mode,surf:o.surf||'dirt',berm:false,forest:!!o.forest,kind:o.kind||'',crowd:!!o.crowd,sprites:[],coins:[],clip:0,fn:0};
   this.segs.push(s);return s;
 };
+Track.prototype.setMode=function(m){this.mode=m;this.warns.push({idx:this.segs.length,mode:m,done:false});return this;};
 Track.prototype.section=function(n,curve,slope,o){
   o=o||{};var s0=this.slope,w0=this.wd,w1=o.w||0.45,en=Math.max(2,Math.floor(n*0.25)),start=this.segs.length;
-  if(o.berm)this.berms++;
   for(var i=0;i<n;i++){
     var c=i<en?ease(0,curve,i/en):(i>=n-en?ease(curve,0,(i-(n-en))/en):curve);
     var sl=i<en?ease(s0,slope,i/en):slope;
@@ -348,102 +380,134 @@ Track.prototype.sideCoin=function(idx,side){
   var s=this.segs[idx];s.coins.push({x:side*(s.wd+0.12),side:true,got:false});
   this.events.push({type:'hop',idx:idx-5,side:side,target:0.38+this.rnd()*0.22});
 };
-var JSIZE={s:{kick:5,kh:0.32,table:10,gap:7,land:8},m:{kick:7,kh:0.42,table:16,gap:11,land:11},l:{kick:9,kh:0.5,table:24,gap:15,land:13}};
+// short rocky step-down inside a technical section
+Track.prototype.step=function(){var w=this.wd;for(var i=0;i<2;i++)this.add(0,-1.4,w,{surf:'rocky',forest:true,kind:'step'});this.slope=-0.6;return this;};
+var JSIZE={s:{kick:5,kh:0.32,table:10,gap:7,land:8,drop:3},m:{kick:7,kh:0.42,table:16,gap:11,land:11,drop:5},l:{kick:9,kh:0.5,table:24,gap:15,land:13,drop:6}};
 Track.prototype.jump=function(o){
-  o=o||{};var size=o.size||'m',J=JSIZE[size],gap=o.type==='gap',i,s0=this.slope,w0=this.wd,jw=size==='s'?0.6:0.78;
+  o=o||{};var type=o.type||'table',size=o.size||'m',J=JSIZE[size],i,s0=this.slope,w0=this.wd,jw=size==='s'?0.6:0.78;
   var surf=o.surf||'dirt',forest=!!o.forest,crowd=!!o.crowd||(!forest&&size!=='s');
   function opt(k,cr){return {surf:surf,forest:forest,kind:k,crowd:cr};}
-  for(i=0;i<7;i++)this.add(0,ease(s0,-0.12,(i+1)/7),ease(w0,jw,(i+1)/7),opt('',crowd&&i>3));
-  for(i=0;i<J.kick;i++)this.add(0,ease(-0.12,J.kh,(i+1)/J.kick),jw,opt('kicker',crowd));
-  var lip=this.segs.length,idealD;
-  if(!gap){
-    for(i=0;i<J.table;i++)this.add(0,0,jw,opt('table',crowd));
-    idealD=(J.table+J.land*0.4)*SEG;
+  var ev={type:'jump',jt:type,size:size,hmul:1,slow:size!=='s',target:0.5+this.rnd()*0.25};
+  if(type==='drop'){
+    for(i=0;i<7;i++)this.add(0,ease(s0,-0.06,(i+1)/7),ease(w0,0.6,(i+1)/7),opt('',crowd&&i>3));
+    ev.idx=this.segs.length;
+    for(i=0;i<J.drop;i++)this.add(0,-1.3,0.6,opt('drop',crowd));
+    for(i=0;i<10;i++)this.add(0,-0.45,0.6,opt('landing',crowd));
+    ev.idealD=(J.drop+3)*SEG;ev.slow=false;ev.target=0.4+this.rnd()*0.25;
   } else {
-    var half=Math.floor(J.gap/2),up=0.75*half/(J.gap-half);
-    for(i=0;i<J.gap;i++)this.add(0,i<half?-0.75:up,jw,opt('gap',crowd));
-    for(i=0;i<2;i++)this.add(0,0.2,jw,opt('lmound',crowd));
-    idealD=(J.gap+2+J.land*0.35)*SEG;
+    var steep=type==='steep',kick=steep?5:J.kick,kh=steep?0.95:J.kh;
+    for(i=0;i<7;i++)this.add(0,ease(s0,-0.12,(i+1)/7),ease(w0,jw,(i+1)/7),opt('',crowd&&i>3));
+    for(i=0;i<kick;i++)this.add(0,ease(-0.12,kh,(i+1)/kick),jw,opt('kicker',crowd));
+    ev.idx=this.segs.length;
+    if(type==='gap'){
+      var half=Math.floor(J.gap/2),up=0.75*half/(J.gap-half);
+      for(i=0;i<J.gap;i++)this.add(0,i<half?-0.75:up,jw,opt('gap',crowd));
+      for(i=0;i<2;i++)this.add(0,0.2,jw,opt('lmound',crowd));
+      for(i=0;i<J.land;i++)this.add(0,-0.55,jw,opt('landing',crowd));
+      ev.idealD=(J.gap+2+J.land*0.35)*SEG;
+    } else if(steep){
+      for(i=0;i<8;i++)this.add(0,0,jw,opt('table',crowd));
+      for(i=0;i<10;i++)this.add(0,-0.8,jw,opt('landing',crowd));
+      ev.idealD=(8+10*0.4)*SEG;ev.hmul=2.4;ev.slow=true;
+    } else {
+      for(i=0;i<J.table;i++)this.add(0,0,jw,opt('table',crowd));
+      for(i=0;i<J.land;i++)this.add(0,-0.55,jw,opt('landing',crowd));
+      ev.idealD=(J.table+J.land*0.4)*SEG;
+    }
   }
-  for(i=0;i<J.land;i++)this.add(0,-0.55,jw,opt('landing',crowd));
-  this.events.push({type:'jump',jt:gap?'gap':'table',size:size,idx:lip,end:this.segs.length,idealD:idealD,target:0.5+this.rnd()*0.25,slow:size!=='s'});
+  ev.end=this.segs.length;this.events.push(ev);
   return this;
 };
 
 function buildLeogang(){
-  var t=new Track(2026);
-  // Rajt – Asitz
-  t.section(14,0,-0.02,{surf:'start',kind:'start',w:0.75,crowd:true});
-  t.section(24,0,-0.42,{surf:'meadow',w:0.6,zone:'Rajt – Asitz-csúcs',crowd:true});
-  t.section(30,2,-0.3,{surf:'meadow',w:0.55,coins:{x:0.1,every:5}});
-  t.jump({size:'m',surf:'meadow'});
-  t.section(24,-3,-0.26,{surf:'meadow',w:0.55});
-  // Felső erdő
-  t.section(28,0,-0.5,{surf:'roots',forest:true,w:0.42,zone:'Felső erdő – gyökerek'});
-  t.section(28,4,-0.56,{surf:'roots',forest:true,w:0.4});
-  t.section(26,-4,-0.5,{surf:'roots',forest:true,w:0.4,coins:{x:0,every:4}});
-  t.jump({size:'s',forest:true});
-  t.section(24,5,-0.45,{surf:'dirt',forest:true,w:0.42});
-  t.section(30,-2,-0.58,{surf:'roots',forest:true,w:0.4,side:1});
-  t.section(30,6,-0.3,{berm:true,forest:true,w:0.56});
-  t.section(26,0,-0.5,{surf:'roots',forest:true,w:0.4});
-  t.jump({size:'s',type:'gap',forest:true});
-  t.section(28,-5,-0.42,{surf:'dirt',forest:true,w:0.42});
-  t.section(28,3,-0.52,{surf:'roots',forest:true,w:0.4});
-  // Tisztás
-  t.section(40,0,-0.18,{surf:'meadow',w:0.6,zone:'Tisztás',coins:{x:-0.15,every:5,wave:0.2}});
-  t.jump({size:'l',surf:'meadow'});
-  t.section(28,-2,-0.2,{surf:'meadow',w:0.6});
-  t.jump({size:'m',type:'gap',surf:'meadow'});
-  t.section(34,5,-0.22,{surf:'meadow',w:0.55,side:-1});
-  t.section(30,-6,-0.2,{berm:true,w:0.6});
-  t.section(30,6,-0.2,{berm:true,w:0.6});
-  // Kőkert
-  t.section(28,0,-0.56,{surf:'roots',forest:true,w:0.4,zone:'Kőkert'});
-  t.section(24,-4,-0.62,{surf:'roots',forest:true,w:0.38});
-  t.section(24,4,-0.56,{surf:'roots',forest:true,w:0.38,coins:{x:0,every:3}});
-  t.jump({size:'s',forest:true});
-  t.section(28,-5,-0.4,{surf:'dirt',forest:true,w:0.42});
-  t.section(26,2,-0.52,{surf:'roots',forest:true,w:0.4,side:-1});
-  t.section(30,-6,-0.28,{berm:true,forest:true,w:0.56});
-  t.jump({size:'m',type:'gap',forest:true});
-  t.section(30,4,-0.45,{surf:'dirt',forest:true,w:0.42});
-  // Középső rét
-  t.section(34,0,-0.22,{surf:'meadow',w:0.6,zone:'Középső rét'});
-  t.jump({size:'m',surf:'meadow'});
-  t.section(30,-3,-0.25,{surf:'meadow',w:0.55,coins:{x:0.15,every:4}});
-  t.jump({size:'l',type:'gap',surf:'meadow'});
-  t.section(30,5,-0.2,{surf:'meadow',w:0.55});
-  t.section(30,-5,-0.24,{berm:true,w:0.6});
-  // Alsó erdő
-  t.section(30,0,-0.5,{surf:'roots',forest:true,w:0.4,zone:'Alsó erdő'});
-  t.section(26,5,-0.46,{surf:'roots',forest:true,w:0.38});
-  t.section(26,-5,-0.48,{surf:'dirt',forest:true,w:0.4,side:1});
-  t.jump({size:'s',type:'gap',forest:true});
-  t.section(28,3,-0.56,{surf:'roots',forest:true,w:0.38});
-  t.section(30,-6,-0.3,{berm:true,forest:true,w:0.56});
-  t.section(30,6,-0.3,{berm:true,forest:true,w:0.56});
-  // Bike park
-  t.section(30,0,-0.3,{surf:'dirt',w:0.55,zone:'Bike park',coins:{x:0,every:3,wave:0.2}});
-  t.jump({size:'m'});
-  t.section(30,-6,-0.24,{berm:true,w:0.6});
-  t.jump({size:'s',type:'gap'});
-  t.section(30,6,-0.24,{berm:true,w:0.6});
-  t.section(28,-4,-0.35,{surf:'dirt',w:0.5,side:-1});
-  t.section(28,4,-0.3,{surf:'meadow',w:0.5});
-  t.section(30,-6,-0.24,{berm:true,w:0.6});
-  // Cél-aréna
-  t.section(24,0,-0.25,{surf:'meadow',w:0.65,zone:'Cél-aréna',crowd:true});
-  t.jump({size:'l',type:'gap',surf:'meadow',crowd:true});
-  t.section(34,0,-0.12,{surf:'meadow',w:0.7,crowd:true,coins:{x:0,every:4}});
+  var t=new Track(2026),F={forest:true};
+  function tf(o){o.forest=true;return o;}
+  // Rajt + 1. ugratós szakasz
+  t.setMode('jump');
+  t.section(14,0,-0.02,{kind:'start',w:0.7,crowd:true});
+  t.section(26,0,-0.3,{surf:'meadow',w:0.6,zone:'Rajt – Asitz-csúcs',crowd:true});
+  t.section(22,1.5,-0.22,{surf:'meadow',w:0.6,coins:{x:0,every:4}});
+  t.jump({type:'table',size:'m',surf:'meadow'});
+  t.section(24,-2,-0.22,{surf:'meadow',w:0.6});
+  t.jump({type:'steep',surf:'meadow'});
+  t.section(22,2,-0.2,{w:0.58,side:1});
+  t.jump({type:'drop',size:'s'});
+  t.section(24,-1.5,-0.22,{w:0.6});
+  // 1. fékezős szakasz
+  t.setMode('tech');
+  t.section(18,0,-0.6,tf({surf:'roots',w:0.36,zone:'Felső erdő – technikás rész'}));
+  t.section(16,8,-0.65,tf({surf:'roots',w:0.34}));
+  t.section(16,-8,-0.65,tf({surf:'rocky',w:0.34}));
+  t.step();
+  t.section(14,0,-0.75,tf({surf:'roots',w:0.33,coins:{x:0,every:4}}));
+  t.section(16,9,-0.6,tf({surf:'mud',w:0.34}));
+  t.section(16,-9,-0.6,tf({surf:'roots',w:0.34}));
+  t.step();
+  t.section(16,7,-0.7,tf({surf:'rocky',w:0.33}));
+  t.section(16,-7,-0.7,tf({surf:'roots',w:0.33}));
+  t.section(14,0,-0.55,tf({surf:'mud',w:0.36}));
+  // 2. ugratós szakasz: kis erdei ugratók, majd tisztás
+  t.setMode('jump');
+  t.section(22,0,-0.22,tf({w:0.55,zone:'Erdei ugratók'}));
+  t.jump({type:'table',size:'s',forest:true});
+  t.section(18,2,-0.2,tf({w:0.55}));
+  t.jump({type:'gap',size:'s',forest:true});
+  t.section(24,-2,-0.2,{surf:'meadow',w:0.6,zone:'Tisztás',coins:{x:0,every:5,wave:0.2}});
+  t.jump({type:'table',size:'l',surf:'meadow'});
+  t.section(20,1.5,-0.22,{surf:'meadow',w:0.6,side:-1});
+  t.jump({type:'drop',size:'m',surf:'meadow'});
+  t.section(20,-2,-0.2,{surf:'meadow',w:0.6});
+  t.jump({type:'steep',surf:'meadow'});
+  t.section(22,0,-0.22,{w:0.55});
+  // 2. fékezős szakasz: kőkert
+  t.setMode('tech');
+  t.section(16,0,-0.65,tf({surf:'rocky',w:0.34,zone:'Kőkert'}));
+  t.section(14,-8,-0.7,tf({surf:'rocky',w:0.32}));
+  t.section(14,8,-0.7,tf({surf:'roots',w:0.32}));
+  t.step();t.section(6,0,-0.6,tf({surf:'rocky',w:0.33}));t.step();
+  t.section(16,-9,-0.62,tf({surf:'mud',w:0.33}));
+  t.section(16,9,-0.62,tf({surf:'roots',w:0.33,coins:{x:0,every:4}}));
+  t.section(14,0,-0.8,tf({surf:'rocky',w:0.32}));
+  t.section(16,-7,-0.6,tf({surf:'roots',w:0.34}));
+  t.step();
+  t.section(14,0,-0.5,tf({surf:'mud',w:0.36}));
+  // 3. ugratós szakasz
+  t.setMode('jump');
+  t.section(24,0,-0.2,{surf:'meadow',w:0.6,zone:'Középső rét'});
+  t.jump({type:'gap',size:'m',surf:'meadow'});
+  t.section(18,-2,-0.2,{surf:'meadow',w:0.6,coins:{x:0,every:4}});
+  t.jump({type:'drop',size:'m'});
+  t.section(18,2,-0.22,{w:0.58,side:1});
+  t.jump({type:'steep'});
+  t.section(18,0,-0.2,{w:0.6});
+  t.jump({type:'table',size:'m'});
+  t.section(20,-1.5,-0.22,{w:0.58});
+  // 3. fékezős szakasz
+  t.setMode('tech');
+  t.section(16,0,-0.6,tf({surf:'roots',w:0.35,zone:'Alsó erdő'}));
+  t.section(14,9,-0.62,tf({surf:'roots',w:0.32}));
+  t.section(14,-9,-0.62,tf({surf:'mud',w:0.32}));
+  t.section(14,9,-0.62,tf({surf:'rocky',w:0.32}));
+  t.step();
+  t.section(14,0,-0.78,tf({surf:'roots',w:0.33}));
+  t.section(16,-8,-0.6,tf({surf:'roots',w:0.33,coins:{x:0,every:4}}));
+  t.step();
+  t.section(16,6,-0.55,tf({surf:'mud',w:0.36}));
+  // Cél-aréna (ugratós)
+  t.setMode('jump');
+  t.section(24,0,-0.2,{w:0.6,zone:'Cél-aréna',crowd:true});
+  t.jump({type:'table',size:'m',crowd:true});
+  t.section(14,0,-0.2,{surf:'meadow',w:0.65,crowd:true});
+  t.jump({type:'gap',size:'l',surf:'meadow',crowd:true});
+  t.section(30,0,-0.12,{surf:'meadow',w:0.7,crowd:true,coins:{x:0,every:4}});
   t.finish=t.segs.length;
-  t.section(4,0,-0.05,{crowd:true,kind:'finish',surf:'start',w:0.8});
-  t.section(180,0,-0.02,{surf:'start',crowd:true,w:0.9});
+  t.section(4,0,-0.05,{crowd:true,kind:'finish',w:0.8});
+  t.section(180,0,-0.02,{crowd:true,w:0.9});
   t.events.sort(function(a,b){return a.idx-b.idx;});
   decorate(t);
   return t;
 }
-function edgeOff(s,sd){var outer=s.berm?(s.curve>0?-1:1):0;return s.wd+0.22+(outer===sd?0.14:0);}
+function edgeOff(s,sd){return s.wd+0.22;}
 function decorate(t){
   var r=mulberry32(99),segs=t.segs;
   for(var i=0;i<segs.length;i++){
@@ -456,14 +520,12 @@ function decorate(t){
         if(r()<0.6)s.sprites.push({t:'tree',off:sd*(ed+2.2+r()*3),seed:r(),big:true});
       } else if(s.surf==='meadow'){
         if(r()<0.07)s.sprites.push({t:'tree',off:sd*(ed+1.2+r()*4),seed:r()});
-      } else if(s.surf!=='start'){
-        if(r()<0.4)s.sprites.push({t:'tree',off:sd*(ed+0.5+r()*2.5),seed:r()});
-      } else if(r()<0.06)s.sprites.push({t:'tree',off:sd*(ed+2+r()*3),seed:r()});
-      if(s.surf==='roots'&&r()<0.14)s.sprites.push({t:'rock',off:sd*(s.wd+0.04+r()*0.1),seed:r()*0.5});
+      } else if(r()<0.3)s.sprites.push({t:'tree',off:sd*(ed+0.6+r()*2.5),seed:r()});
+      if((s.surf==='rocky'&&r()<0.4)||(s.surf==='roots'&&r()<0.14))s.sprites.push({t:'rock',off:sd*(s.wd+0.04+r()*0.14),seed:r()*0.6});
       if(s.crowd&&i%2===0){
         s.sprites.push({t:'fan',off:sd*(ed+0.15+r()*0.35),seed:r()});
         if(r()<0.55)s.sprites.push({t:'fan',off:sd*(ed+0.5+r()*0.5),seed:r()});
-      } else if(i%8===0&&s.surf!=='start'){
+      } else if(i%8===0&&s.kind!=='start'){
         s.sprites.push({t:'post',off:sd*ed,seed:0});
       }
     }
@@ -475,7 +537,7 @@ function decorate(t){
 /* ---------- state ---------- */
 var TRACK=buildLeogang(), segs=TRACK.segs, BIKE=bikeById(P.bike);
 var G={state:'attract',position:0,speed:0,x:0,head:0,steer:0,slip:0,endo:0,fish:0,comp:0,crashes:0,time:0,runCoins:0,trickCoins:0,air:null,
-  evIdx:0,lastIdx:0,roll:0,pitch:0,camDrop:0,shake:0,clock:0,skyX:0,cd:0,cdShown:0,panic:0,ft:0,finalTime:0,
+  evIdx:0,lastIdx:0,leversOn:null,roll:0,pitch:0,camDrop:0,shake:0,clock:0,skyX:0,cd:0,cdShown:0,panic:0,ft:0,finalTime:0,
   breathPh:0,rattleCd:0,paused:false,zoneIdx:0,crash:null,resultShown:false,frontV:0,rearV:0,shadeAmt:0};
 var gyro={raw:0,neutral:0,active:false,listening:false};
 function findSeg(z){var i=Math.floor(z/SEG);if(i<0)i=0;if(i>=segs.length)i=segs.length-1;return segs[i];}
@@ -519,9 +581,10 @@ var PAL={
   dirt:  {g1:[70,112,58], g2:[64,104,54], edge:[96,74,50], r1:[146,106,70],r2:[136,98,64], rut:[118,84,54]},
   roots: {g1:[58,84,46],  g2:[54,78,43],  edge:[78,60,42], r1:[124,90,60], r2:[114,83,55], rut:[98,72,46]},
   meadow:{g1:[106,160,72],g2:[98,150,66], edge:[96,128,62],r1:[142,124,76],r2:[132,116,70],rut:[120,98,62]},
-  start: {g1:[112,138,96],g2:[104,130,90],edge:[90,90,88], r1:[168,162,150],r2:[158,152,142],rut:[146,140,132]}
+  mud:   {g1:[58,80,44],  g2:[54,74,41],  edge:[64,48,34], r1:[96,70,48],  r2:[88,64,44],  rut:[72,52,36]},
+  rocky: {g1:[62,82,48],  g2:[58,76,45],  edge:[90,86,80], r1:[128,106,82],r2:[118,98,76], rut:[104,94,84]}
 };
-var PLANK1=[194,150,98],PLANK2=[170,128,82],WALL1=[150,110,68],WALL2=[132,96,58],JUMP1=[172,128,84],JUMP2=[160,118,76],PIT=[58,40,26];
+var PLANK1=[194,150,98],PLANK2=[170,128,82],WALL1=[150,110,68],WALL2=[132,96,58],JUMP1=[172,128,84],JUMP2=[160,118,76],PIT=[58,40,26],ROADC=[140,102,66];
 function mix(c,f,dk){var m=dk||1;return 'rgb('+((c[0]*m+(FOG[0]-c[0]*m)*f)|0)+','+((c[1]*m+(FOG[1]-c[1]*m)*f)|0)+','+((c[2]*m+(FOG[2]-c[2]*m)*f)|0)+')';}
 function poly(x1,y1,x2,y2,x3,y3,x4,y4,col){ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.lineTo(x3,y3);ctx.lineTo(x4,y4);ctx.closePath();ctx.fill();}
 function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();c.fill();}
@@ -537,29 +600,25 @@ function project(p,camX,camY,camZ){
 }
 function drawSegment(s,n,maxy){
   var nx=segs[s.i+1]||s,a=s.p1.screen,b=s.p2.screen;
-  var x1=a.x,y1=Math.min(a.y,maxy),x2=b.x,y2=b.y,u1=a.w,u2=b.w,w1=u1*s.wd,w2=u2*nx.wd;
+  var x1=a.x,y1=Math.min(a.y,maxy)+1.5,x2=b.x,y2=b.y,u1=a.w,u2=b.w,w1=u1*s.wd,w2=u2*nx.wd;
   var f=n/DRAW;f=f*f*0.92;var dk=s.forest?0.72:1;
   var alt=Math.floor(s.i/3)%2,pal=PAL[s.surf]||PAL.dirt;
   ctx.fillStyle=mix(s.forest?(alt?[56,70,40]:[52,66,38]):(alt?pal.g1:pal.g2),f,dk);ctx.fillRect(-W,y2,W*3,y1-y2+1);
   var e1=w1+u1*0.07,e2=w2+u2*0.07;
-  poly(x1-e1,y1,x1+e1,y1,x2+e2,y2,x2-e2,y2,mix(pal.edge,f,dk));
-  var rc;
-  if(s.berm)rc=s.i%2?PLANK1:PLANK2;
-  else if(s.kind==='gap')rc=PIT;
-  else if(s.kind==='kicker'||s.kind==='table'||s.kind==='landing'||s.kind==='lmound')rc=alt?JUMP1:JUMP2;
-  else rc=alt?pal.r1:pal.r2;
+  poly(x1-e1,y1,x1+e1,y1,x2+e2,y2,x2-e2,y2,mix([112,84,56],f,dk));
+  var rc=s.kind==='gap'?PIT:(s.kind==='step'?[96,74,52]:ROADC);
   poly(x1-w1,y1,x1+w1,y1,x2+w2,y2,x2-w2,y2,mix(rc,f,dk));
-  if(s.berm){
-    var sd=s.curve>0?-1:1,o1=x1+sd*w1,o2=x2+sd*w2;
-    poly(o1,y1,o1+sd*u1*0.2,y1-u1*0.22,o2+sd*u2*0.2,y2-u2*0.22,o2,y2,mix(s.i%2?WALL1:WALL2,f,dk));
-    if(n<60){ctx.fillStyle=mix([110,80,50],f,dk);ctx.fillRect(Math.min(x1-w1,x1+w1),y1-1,w1*2,Math.max(1,(y1-y2)*0.12));}
-  } else if(s.surf!=='start'&&s.kind!=='gap'){
-    poly(x1-w1*0.3,y1,x1+w1*0.3,y1,x2+w2*0.3,y2,x2-w2*0.3,y2,mix(pal.rut,f,dk));
+  var hsh=(s.i*2654435761>>>0)%97;
+  if(n<55&&s.kind!=='gap'&&(s.surf==='rocky'||hsh%6===0)){
+    ctx.fillStyle=mix([122,118,110],f,dk);
+    var cnt=s.surf==='rocky'?2:1;
+    for(var q=0;q<cnt;q++){var rx=(((s.i*53+q*29)%17)/17-0.5)*1.6;ctx.beginPath();ctx.ellipse(x1+w1*rx,y1-(y1-y2)*0.3,Math.max(1,w1*0.09),Math.max(1,(y1-y2)*0.5),0,0,6.2832);ctx.fill();}
   }
-  if(s.surf==='roots'&&s.i%3===0&&n<70){
-    var th=Math.max(1,(y1-y2)*0.45),tw=s.i%2?1:-1;
-    poly(x1-w1*1.05,y1-th*(tw>0?0.1:0.8),x1+w1*1.05,y1-th*(tw>0?0.8:0.1),x2+w2*1.05,y1-th*(tw>0?1.1:0.4),x2-w2*1.05,y1-th*(tw>0?0.4:1.1),mix([72,50,32],f,dk));
+  if(n<70&&s.kind!=='gap'&&((s.surf==='roots'&&s.i%3===0)||hsh%11===0)){
+    var th=Math.max(1,(y1-y2)*0.4),tw=s.i%2?1:-1;
+    poly(x1-w1*1.05,y1-th*(tw>0?0.1:0.8),x1+w1*1.05,y1-th*(tw>0?0.8:0.1),x2+w2*1.05,y1-th*(tw>0?1.1:0.4),x2-w2*1.05,y1-th*(tw>0?0.4:1.1),mix([84,58,36],f,dk));
   }
+  if(s.kind==='step'&&n<80){ctx.fillStyle=mix([70,52,36],f,dk);ctx.fillRect(x1-w1,y2,w1*2,Math.max(2,(y1-y2)*0.35));}
   if(s.kind==='finish'){
     var cells=10,cw=(w1*2)/cells;for(var c=0;c<cells;c++){ctx.fillStyle=(c%2)?'#111':'#fff';ctx.fillRect(x1-w1+c*cw,y2,cw+1,Math.max(2,y1-y2));}
   }
@@ -595,7 +654,7 @@ function drawSprites(){
     var bx=s.p1.screen.x,by=s.p1.screen.y,f=s.fn/DRAW;f=f*f*0.9;var dk=s.forest?0.75:1;
     var clipped=false;
     if(by>s.clip+1){ctx.save();ctx.beginPath();ctx.rect(-W,-H*3,W*3,s.clip+H*3);ctx.clip();clipped=true;}
-    if(s.surf!=='start'&&s.fn<100&&!s.crowd){
+    if(s.kind!=='start'&&s.fn<100&&!s.crowd){
       var k2=s.p2.screen.scale*W/2,nx=segs[s.i+1]||s;
       for(var sd=-1;sd<=1;sd+=2){
         var o1=sd*edgeOff(s,sd),o2=sd*edgeOff(nx,sd);
@@ -892,16 +951,17 @@ var input={front:0,rear:0};
 var keys={left:false,right:false,front:false,rear:false,up:false,down:false};
 function renderLever(side){
   var v=side==='L'?input.rear:input.front;
-  $('lv'+side).setAttribute('transform','rotate('+(3+v*82).toFixed(1)+' 8 8)');
-  $('arc'+side).setAttribute('stroke-dashoffset',(132*(1-v)).toFixed(1));
+  $('lv'+side).setAttribute('transform','rotate('+(v*45).toFixed(1)+' 14 22)');
+  $('arc'+side).setAttribute('stroke-dashoffset',(86.4*(1-v)).toFixed(1));
 }
 function bindLever(el,side){
   var which=side==='L'?'rear':'front',active=null,mdown=false;
   function setPt(x,y){
-    var r=el.getBoundingClientRect(),pv=r.width*0.08;
-    var dx=side==='R'?(r.right-x)-pv:(x-r.left)-pv,dy=(y-r.top)-pv;
+    var r=el.querySelector('svg').getBoundingClientRect(),sc=r.width/140;
+    var px=side==='R'?r.right-(14+8)*sc:r.left+(14+8)*sc,py=r.top+(22+4)*sc;
+    var dx=side==='R'?(px-x):(x-px),dy=y-py;
     var ang=Math.atan2(Math.max(dy,0),Math.max(dx,0.001))*180/Math.PI;
-    input[which]=clamp((ang-4)/80,0,1);renderLever(side);
+    input[which]=clamp((ang-2)/40,0,1);renderLever(side);
   }
   function release(){input[which]=0;renderLever(side);}
   el.addEventListener('touchstart',function(e){e.preventDefault();var t=e.changedTouches[0];active=t.identifier;setPt(t.clientX,t.clientY);},{passive:false});
@@ -939,7 +999,8 @@ function renderGauge(){
 })();
 function startGauge(ev){
   gauge.ev=ev;gauge.v=0;gauge.shown=true;
-  $('gLabel').innerHTML=ev.type==='jump'?(ev.jt==='gap'?'Gödrös ugrató!':'Ugrató!')+'<small>húzd fel a célkeresztig</small>':(ev.side>0?'Érme jobbra':'Érme balra')+'<small>kormányozz oda, pattanj</small>';
+  var JL={gap:'Gödrös ugrató!',steep:'Meredek ugrató!',table:'Ugrató!',drop:'Letörés!'};
+  $('gLabel').innerHTML=ev.type==='jump'?JL[ev.jt]+(ev.jt==='drop'?'<small>emeld meg az elejét</small>':'<small>húzd fel a célkeresztig</small>'):(ev.side>0?'Érme jobbra':'Érme balra')+'<small>kormányozz oda, pattanj</small>';
   show('gauge',true);renderGauge();
 }
 function hideGauge(){gauge.shown=false;gauge.ev=null;show('gauge',false);}
@@ -1056,11 +1117,18 @@ function doTrick(tr,b){
   var all=$('tricks').children;for(var i=0;i<all.length;i++)if(all[i]!==b)all[i].classList.add('busy');
   sfxWhoosh();
 }
-function setGameUI(on){show('hud',on);show('leverL',on);show('leverR',on);if(!on){hideGauge();show('tricks',false);input.front=input.rear=0;renderLever('L');renderLever('R');}}
+function setLevers(on){if(G.leversOn===on)return;G.leversOn=on;show('leverL',on);show('leverR',on);if(!on){input.front=input.rear=0;renderLever('L');renderLever('R');}}
+function warn(txt,kind){var el=$('warn');el.textContent=txt;el.className='';void el.offsetWidth;el.className='go '+kind;}
+function setGameUI(on){show('hud',on);if(!on)setLevers(false);if(!on){hideGauge();show('tricks',false);input.front=input.rear=0;renderLever('L');renderLever('R');}}
 
 /* ---------- events (jumps & hops) ---------- */
 function resolveEvent(ev){
   var p=gauge.v;hideGauge();
+  if(ev.type==='jump'&&ev.jt==='drop'){
+    var Dd=ev.idealD*(0.85+0.3*Math.min(1.4,G.speed/(0.5*MAXU)));
+    launch(Math.min(1.3,Math.max(0.35,Dd/Math.max(G.speed,1))),70,false,false,false);G.air.ev=ev;G.air.D=Dd;G.air.lift=p;sfxWhoosh();
+    return;
+  }
   if(ev.type==='jump'){
     if(p<0.06||G.speed<MAXU*0.1){
       if(ev.jt==='gap')toast('Nem ugrattál!');else{G.speed*=0.6;toast('Nem ugrattál, lelassultál');}
@@ -1081,7 +1149,7 @@ function launch(T,Hp,slow,hopF,over){
 }
 function takeoff(ev,D){
   var T=Math.min(3,D/Math.max(G.speed,1));
-  launch(T,180+D*0.1,ev.slow,false,false);G.air.ev=ev;G.air.D=D;sfxWhoosh();
+  launch(T,(180+D*0.1)*(ev.hmul||1),ev.slow,false,false);G.air.ev=ev;G.air.D=D;sfxWhoosh();
   if(ev.slow)showTricks();
 }
 function hop(over){launch(over?0.6:0.42,over?760:480,false,true,over);sfxWhoosh();}
@@ -1098,6 +1166,11 @@ function land(){
   if(a.hop){if(a.over)return crash('Túl nagyot pattantál!');sfxThud();G.comp=0.6;return;}
   if(a.cur)return crash('Nem fejezted be a trükköt!');
   var ev=a.ev,k=seg.kind;
+  if(ev.jt==='drop'){
+    if(a.lift<ev.target-0.17)return crash('Orra buktál!');
+    if(a.lift>ev.target+0.25)return crash('Hátraborultál!');
+    sfxThud();G.comp=0.9;G.shake=Math.max(G.shake,0.8);toast(Math.abs(a.lift-ev.target)<0.07?'Tökéletes letörés!':'Megvan!');return;
+  }
   if(k==='gap')return crash('Beestél a gödörbe!');
   if(k==='lmound')return crash('Nekicsapódtál az érkezőnek!');
   if(seg.i>=ev.end)return crash('Túlugrattál!');
@@ -1114,7 +1187,7 @@ function land(){
 /* ---------- race flow ---------- */
 function resetRun(){
   G.position=0;G.speed=0;G.x=0;G.head=0;G.steer=0;G.slip=0;G.endo=0;G.fish=0;G.comp=0;G.crashes=0;G.time=0;G.runCoins=0;G.trickCoins=0;G.air=null;
-  G.evIdx=0;G.lastIdx=0;G.roll=0;G.camDrop=0;G.shake=0;G.panic=0;G.zoneIdx=0;G.crash=null;G.resultShown=false;G.paused=false;G.frontV=0;G.rearV=0;
+  G.evIdx=0;G.lastIdx=0;G.roll=0;G.camDrop=0;G.shake=0;G.panic=0;G.zoneIdx=0;G.crash=null;G.resultShown=false;G.paused=false;G.frontV=0;G.rearV=0;G.leversOn=null;setLevers(false);
 }
 function startRace(){
   TRACK=buildLeogang();segs=TRACK.segs;BIKE=bikeById(P.bike);resetRun();
@@ -1155,7 +1228,9 @@ function respawn(){
 function raceStep(dt){
   var slow=(G.air&&G.air.slow)?0.5:1,gdt=dt*slow;G.time+=gdt;
   var pz=G.position+PLAYERZ,seg=findSeg(pz);
-  var f=Math.max(input.front,keys.front?1:0),r=Math.max(input.rear,keys.rear?1:0);
+  var tech=seg.mode==='tech';
+  setLevers(tech);
+  var f=tech?Math.max(input.front,keys.front?1:0):0,r=tech?Math.max(input.rear,keys.rear?1:0):0;
   var maxU=MAXU*BIKE.max,sp=G.speed/MAXU,slope=(seg.p2.world.y-seg.p1.world.y)/SEG,steep=Math.max(0,-slope);
   var rearLock=r>0.6?(r-0.6)/0.4:0;
   G.comp=lerp(G.comp,f*0.85*Math.min(1,0.3+sp*1.5),Math.min(1,dt*7));
@@ -1166,7 +1241,7 @@ function raceStep(dt){
     if(seg.kind==='gap')return crash('Beestél a gödörbe!');
     var grav=clamp(0.35-1.6*slope,-1.4,1.7),A=MAXU*0.5*BIKE.accel;
     G.speed+=(A*grav-A*1.2*Math.pow(G.speed/maxU,2))*gdt;
-    G.speed-=MAXU*(0.46*f+0.24*r*(1-0.35*rearLock))*BIKE.brake*gdt;
+    G.speed-=MAXU*(0.95*f+0.5*r*(1-0.35*rearLock))*BIKE.brake*gdt;
     if(G.speed<0)G.speed=0;sp=G.speed/MAXU;
     var outer=seg.berm?(seg.curve>0?-1:1):0,onOuter=outer!==0&&G.x*outer>0,ax=Math.abs(G.x);
     if(ax>seg.wd&&!onOuter){G.speed-=G.speed*1.1*gdt;G.shake=Math.max(G.shake,0.5);}
@@ -1179,14 +1254,19 @@ function raceStep(dt){
     G.head=clamp(G.head,-1.1,1.1);
     G.x+=Math.sin(G.head)*sp*gdt*2.3;
     // grip
-    var lat=sp*Math.abs(omega),Gr=0.7*BIKE.grip*(seg.berm?2.1:1)*(1-0.25*f*f)*(seg.surf==='roots'?0.9:1);
+    var SG={roots:0.9,mud:0.82,rocky:0.9};
+    var lat=sp*Math.abs(omega),Gr=0.7*BIKE.grip*(1-0.25*f*f)*(SG[seg.surf]||1);
     if(lat>Gr)G.slip+=((lat/Gr-1)*4+0.5)*gdt;
     if(rearLock>0&&sp>0.12)G.slip+=rearLock*(Math.abs(seg.curve)*0.09+steep*1.4)*sp*gdt*1.6;
     if(lat<=Gr&&rearLock===0)G.slip=Math.max(0,G.slip-gdt*1.4);
     if(G.slip>=1)return crash(rearLock>0?'Elfarolt a bringa!':'Kicsúsztál a kanyarban!');
     // endo: only front brake on a steep section
     if(f>0.65&&r<0.35&&steep>0.28&&sp>0.22)G.endo+=(f-0.6)*(steep-0.2)*sp*gdt*16;else G.endo=Math.max(0,G.endo-gdt*2);
-    if(G.endo>=1)return crash('Átestél a kormányon!');
+    // technical section: not braking enough on the steep -> over the bars
+    if(tech&&steep>0.45&&sp>0.45)G.endo+=(sp-0.45)*steep*gdt*14;
+    if(seg.kind==='step'&&segs[seg.i-1].kind!=='step'&&sp>0.36)return crash('Orra buktál a letörésen!');
+    if(seg.kind==='step'){G.shake=Math.max(G.shake,0.9);G.comp=Math.max(G.comp,0.8);}
+    if(G.endo>=1)return crash(tech&&f<0.65?'Orra buktál, túl gyors voltál!':'Átestél a kormányon!');
     if(ax>edgeOff(seg,G.x>0?1:-1))return crash('Kimentél a pályáról!');
   }
   G.position+=G.speed*gdt;
@@ -1202,9 +1282,13 @@ function raceStep(dt){
   }
   G.lastIdx=Math.max(G.lastIdx,idx);
   var z=TRACK.zones[G.zoneIdx];if(z&&idx>=z.idx){G.zoneIdx++;toast(z.name);}
+  for(var wi=0;wi<TRACK.warns.length;wi++){var w=TRACK.warns[wi];
+    if(!w.done&&idx>=w.idx-(w.mode==='tech'?70:45)&&idx<w.idx+5){w.done=true;if(w.idx>20)warn(w.mode==='tech'?'Fékezős szakasz jön!':'Ugratós szakasz, nincs fék!',w.mode);}}
+  for(var ei=G.evIdx;ei<TRACK.events.length&&ei<G.evIdx+3;ei++){var we=TRACK.events[ei];
+    if(we.type==='jump'&&!we.warned&&idx>=we.idx-80&&idx<we.idx){we.warned=true;warn(we.jt==='drop'?'Letörés jön!':(we.jt==='steep'?'Meredek ugrató jön!':(we.jt==='gap'?'Gödrös ugrató jön!':'Ugrató jön!')),'jump');}}
   var ev=TRACK.events[G.evIdx];
   if(ev){
-    var win=ev.type==='jump'?38:22;
+    var win=ev.type==='jump'?44:22;
     if(idx>=ev.idx-win&&idx<ev.idx&&gauge.ev!==ev)startGauge(ev);
     if(idx>=ev.idx){G.evIdx++;resolveEvent(ev);}
   }
@@ -1329,8 +1413,8 @@ function update(dt){
   if(!keys.left&&!keys.right&&gyro.active){var d=gyro.raw-gyro.neutral;if(Math.abs(d)<1.5)d=0;else d-=d>0?1.5:-1.5;st=clamp(d/20,-1,1);}
   if(G.state==='race'||G.state==='countdown')G.steer+=(st-G.steer)*Math.min(1,dt*12);else G.steer*=0.9;
   if(gauge.shown){if(keys.up)gauge.v=Math.min(1,gauge.v+dt*0.8);if(keys.down)gauge.v=Math.max(0,gauge.v-dt*0.8);renderGauge();}
-  G.frontV=lerp(G.frontV,Math.max(input.front,keys.front?1:0),Math.min(1,dt*20));
-  G.rearV=lerp(G.rearV,Math.max(input.rear,keys.rear?1:0),Math.min(1,dt*20));
+  var lo=G.leversOn===true;G.frontV=lerp(G.frontV,lo?Math.max(input.front,keys.front?1:0):0,Math.min(1,dt*20));
+  G.rearV=lerp(G.rearV,lo?Math.max(input.rear,keys.rear?1:0):0,Math.min(1,dt*20));
   if(G.state==='attract'){
     G.speed=2000;G.position+=G.speed*dt;if(G.position>(TRACK.finish-10)*SEG)G.position=0;
     var s0=findSeg(G.position+PLAYERZ);G.x=lerp(G.x,s0.curve*0.03,dt);G.head=lerp(G.head,0,dt*2);
@@ -1349,7 +1433,7 @@ function update(dt){
     G.roll=lerp(G.roll,target,Math.min(1,dt*4));G.camDrop=lerp(G.camDrop,0,Math.min(1,dt*3));
   }
   var sum=0,n=0;for(var i=0;i<14;i++){var s=segs[seg.i+i];if(!s)break;sum+=(s.p2.world.y-s.p1.world.y)/SEG;n++;}
-  var avg=n?sum/n:0,tp=-CAMD*avg*H/2*0.85+G.comp*H*0.03;G.pitch=lerp(G.pitch,tp,Math.min(1,dt*3));
+  var avg=n?sum/n:0,lift=(G.air&&G.air.lift!==undefined)?G.air.lift:0,tp=-CAMD*avg*H/2*0.85+G.comp*H*0.03-lift*H*0.12;G.pitch=lerp(G.pitch,tp,Math.min(1,dt*3));
   var maxPos=(segs.length-DRAW-2)*SEG;if(G.position>maxPos)G.position=maxPos;
   updateHUD();updateAudio(dt);
   $('vig').style.opacity=G.state==='race'?clamp((Math.max(G.slip,G.endo)-0.15)*1.1,0,0.9):0;
