@@ -351,7 +351,7 @@ var P={
 function bikeById(id){for(var i=0;i<BIKES.length;i++)if(BIKES[i].id===id)return BIKES[i];return BIKES[0];}
 function save(){store.set('mdh_name',P.name);store.set('mdh_coins',P.coins);store.set('mdh_owned',P.owned);store.set('mdh_bike',P.bike);store.set('mdh_sound',P.sound);}
 
-var SPEEDK=0.8;
+var SPEEDK=0.7;
 /* ---------- track ---------- */
 function mkp(y,z){return {world:{y:y,z:z},camera:{x:0,y:0,z:0},screen:{x:0,y:0,w:0,scale:0}};}
 function Track(seed){this.steps=[];this.segs=[];this.y=0;this.slope=0;this.wd=0.6;this.mode='jump';this.events=[];this.zones=[];this.warns=[];this.rnd=mulberry32(seed);}
@@ -511,7 +511,7 @@ function buildLeogang(){
   decorate(t);
   return t;
 }
-function edgeOff(s,sd){var outer=s.berm?(s.curve>0?-1:1):0;return s.wd+(s.mode==='tech'?0.1:0.22)+(outer===sd?0.32:0);}
+function edgeOff(s,sd){var outer=s.berm?(s.curve>0?-1:1):0;return s.wd+(s.mode==='tech'?0.2:0.35)+(outer===sd?0.32:0);}
 function decorate(t){
   var r=mulberry32(99),segs=t.segs;
   for(var i=0;i<segs.length;i++){
@@ -529,8 +529,6 @@ function decorate(t){
       if(s.crowd&&i%2===0){
         s.sprites.push({t:'fan',off:sd*(ed+0.15+r()*0.35),seed:r()});
         if(r()<0.55)s.sprites.push({t:'fan',off:sd*(ed+0.5+r()*0.5),seed:r()});
-      } else if(i%8===0&&s.kind!=='start'){
-        s.sprites.push({t:'post',off:sd*ed,seed:0});
       }
     }
     if(s.crowd&&i%2===0&&r()<0.14)s.sprites.push({t:'flag',off:(r()<0.5?-1:1)*(edgeOff(s,1)+0.8),seed:r()});
@@ -639,10 +637,9 @@ function drawSegment(s,n,maxy){
   }
 }
 function renderWorld(){
-  var base=findSeg(G.position),basePct=(G.position-base.i*SEG)/SEG;
-  var pz=G.position+PLAYERZ;
-  var pY=G.air?G.air.y:roadY(pz);
-  var camY=pY+CAMH+(G.camOff||0)+G.camDrop,camZ=G.position;
+  var camZ=G.position+PLAYERZ*0.85,base=findSeg(camZ),basePct=(camZ-base.i*SEG)/SEG;
+  var pY=G.air?G.air.y:roadY(camZ);
+  var camY=pY+CAMH+G.camDrop;
   var x=0,dx=-(base.curve*basePct),maxy=H*1.5,camX=G.x*ROAD,yaw=G.head*0.9;
   frameSegs.length=0;
   for(var n=0;n<DRAW;n++){
@@ -675,15 +672,6 @@ function drawSprites(){
       poly(bo1,by+1,bo1+bsd*k*ROAD*0.34,by-bh1+1,bo2+bsd*k2b*ROAD*0.34,s.p2.screen.y-bh2-1,bo2,s.p2.screen.y-1,mix([150,112,74],f,dk));
       poly(bo1+bsd*k*ROAD*0.3,by-bh1*0.9,bo1+bsd*k*ROAD*0.36,by-bh1,bo2+bsd*k2b*ROAD*0.36,s.p2.screen.y-bh2,bo2+bsd*k2b*ROAD*0.3,s.p2.screen.y-bh2*0.9,mix([112,82,54],f,dk));
     }
-    if(s.kind!=='start'&&s.fn<100&&!s.crowd){
-      var k2=s.p2.screen.scale*W/2,nx=segs[s.i+1]||s;
-      for(var sd=-1;sd<=1;sd+=2){
-        var o1=sd*edgeOff(s,sd),o2=sd*edgeOff(nx,sd),th1=(s.berm&&sd===(s.curve>0?-1:1))?ROAD*0.6:0,th2=(nx.berm&&sd===(nx.curve>0?-1:1))?ROAD*0.6:0;
-        var ax1=bx+k*o1*ROAD,ay1=by-k*(640+th1),ax2=s.p2.screen.x+k2*o2*ROAD,ay2=s.p2.screen.y-k2*(640+th2);
-        ctx.fillStyle=mix((s.i%2)?[38,88,205]:[236,240,244],f,dk);
-        ctx.beginPath();ctx.moveTo(ax1,ay1);ctx.lineTo(ax2,ay2);ctx.lineTo(ax2,ay2+Math.max(1,k2*80));ctx.lineTo(ax1,ay1+Math.max(1,k*80));ctx.closePath();ctx.fill();
-      }
-    }
     for(var j=0;j<s.sprites.length;j++){
       var sp=s.sprites[j],sx=bx+k*sp.off*ROAD;
       if(sx<-W*0.5||sx>W*1.5)continue;
@@ -692,7 +680,7 @@ function drawSprites(){
       else if(sp.t==='post')drawPost(sx,by,k,f);
       else if(sp.t==='flag')drawFlag(sx,by,k,sp.seed,t,f);
       else if(sp.t==='rock'){if(s.fn>5)drawRock(sx,by,k*0.4,sp.seed,f);}
-      else if(sp.t==='sign')drawSign(sx,by,k,f,dk);
+      else if(sp.t==='sign'){if(s.fn>4)drawSign(sx,by,k,f,dk);}
       else if(sp.t==='banner')drawBanner(sx,by,k,sp.text,f);
     }
     for(j=0;j<s.coins.length;j++){
@@ -1169,7 +1157,7 @@ function resolveEvent(ev){
   } else {
     if(p<0.06)return;
     var d=p-ev.target;
-    if(d>0.22)hop(true);else if(d>=-0.16)hop(false);else toast('Kevés volt!');
+    if(d>0.3)hop(true);else if(d>=-0.2)hop(false);else toast('Kevés volt!');
   }
 }
 function launch(T,Hp,slow,hopF,over){
@@ -1197,8 +1185,8 @@ function land(){
   if(a.cur)return crash('Nem fejezted be a trükköt!');
   var ev=a.ev,k=seg.kind;
   if(ev.jt==='drop'){
-    if(a.lift<ev.target-0.17)return crash('Orra buktál!');
-    if(a.lift>ev.target+0.25)return crash('Hátraborultál!');
+    if(a.lift<ev.target-0.25)return crash('Orra buktál!');
+    if(a.lift>ev.target+0.33)return crash('Hátraborultál!');
     sfxThud();G.comp=0.9;G.shake=Math.max(G.shake,0.8);toast(Math.abs(a.lift-ev.target)<0.07?'Tökéletes letörés!':'Megvan!');return;
   }
   if(k==='gap')return crash('Beestél a gödörbe!');
@@ -1285,16 +1273,16 @@ function raceStep(dt){
     G.x+=Math.sin(G.head)*sp*gdt*2.3;
     // grip
     var SG={roots:0.9,mud:0.82,rocky:0.9};
-    var lat=sp*Math.abs(omega),Gr=0.7*BIKE.grip*(seg.berm?2.1:1)*(1-0.25*f*f)*(SG[seg.surf]||1);
-    if(lat>Gr)G.slip+=((lat/Gr-1)*4+0.5)*gdt;
-    if(rearLock>0&&sp>0.12)G.slip+=rearLock*(Math.abs(seg.curve)*0.09+steep*1.4)*sp*gdt*1.6;
-    if(lat<=Gr&&rearLock===0)G.slip=Math.max(0,G.slip-gdt*1.4);
+    var lat=sp*Math.abs(omega),Gr=0.9*BIKE.grip*(seg.berm?2.1:1)*(1-0.25*f*f)*(SG[seg.surf]||1);
+    if(lat>Gr)G.slip+=((lat/Gr-1)*2.5+0.3)*gdt;
+    if(rearLock>0&&sp>0.12)G.slip+=rearLock*(Math.abs(seg.curve)*0.09+steep*1.4)*sp*gdt*1.0;
+    if(lat<=Gr&&rearLock===0)G.slip=Math.max(0,G.slip-gdt*2);
     if(G.slip>=1)return crash(rearLock>0?'Elfarolt a bringa!':'Kicsúsztál a kanyarban!');
     // endo: only front brake on a steep section
-    if(f>0.8&&r<0.25&&steep>0.45&&sp>0.25)G.endo+=(f-0.75)*(steep-0.4)*sp*gdt*12;else G.endo=Math.max(0,G.endo-gdt*2);
+    if(f>0.85&&r<0.2&&steep>0.5&&sp>0.3)G.endo+=(f-0.8)*(steep-0.45)*sp*gdt*8;else G.endo=Math.max(0,G.endo-gdt*2);
     // technical section: not braking enough on the steep -> over the bars
-    if(tech&&steep>0.45&&sp>0.5)G.endo+=(sp-0.5)*steep*gdt*8;
-    if(seg.kind==='step'&&segs[seg.i-1].kind!=='step'&&sp>0.42)return crash('Orra buktál a letörésen!');
+    if(tech&&steep>0.45&&sp>0.55)G.endo+=(sp-0.55)*steep*gdt*5;
+    if(seg.kind==='step'&&segs[seg.i-1].kind!=='step'&&sp>0.5)return crash('Orra buktál a letörésen!');
     if(seg.kind==='step'){G.shake=Math.max(G.shake,0.9);G.comp=Math.max(G.comp,0.8);}
     if(G.endo>=1)return crash(tech&&f<0.65?'Orra buktál, túl gyors voltál!':'Átestél a kormányon!');
     if(ax>edgeOff(seg,G.x>0?1:-1))return crash('Kimentél a pályáról!');
@@ -1456,7 +1444,6 @@ function update(dt){
   else if(G.state==='finished')finishStep(dt);
   G.rattleCd-=dt;G.shake=Math.max(0,G.shake-dt*2.5);
   var seg=findSeg(G.position+PLAYERZ),sp=G.speed/MAXU;
-  if(!G.air)G.camOff=lerp(G.camOff||0,Math.max(0,roadY(G.position+60)-roadY(G.position+PLAYERZ)),Math.min(1,dt*6));
   G.skyX+=seg.curve*sp*dt*0.06;
   G.shadeAmt=lerp(G.shadeAmt||0,seg.forest?0.3:0,Math.min(1,dt*1.5));
   if(G.state!=='crashed'){
